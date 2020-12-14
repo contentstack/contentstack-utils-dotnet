@@ -25,7 +25,7 @@ namespace Contentstack.Utils.Tests.Mocks
                     {
                         renderString += $"<div {attributeString}> <b>{((IEmbeddedEntry)embeddedObject).Title}</b></div>";
                     }
-                    else if (embeddedObject is IEmbeddedContentTypeUid)
+                    else
                     {
                         renderString += $"<div {attributeString}> <b>{embeddedObject.Uid}</b></div>";
                     }
@@ -36,22 +36,19 @@ namespace Contentstack.Utils.Tests.Mocks
                     {
                         return $"<span {attributeString}><b>{((IEmbeddedEntry)embeddedObject).Title}</b></span>";
                     }
-                    else if (embeddedObject is IEmbeddedContentTypeUid)
+                    else
                     {
                         return $"<span {attributeString}><b>{embeddedObject.Uid}</b></span>";
                     }
-                    return "<span>" + embeddedObject.Uid + "</span>";
                 case Enums.StyleType.Link:
                     if (embeddedObject is IEmbeddedEntry)
                     {
                         return $"<span> Please find link to: <a {attributeString}><b>{metadata.Text ?? ((IEmbeddedEntry)embeddedObject).Title}</b></a></span>";
                     }
-                    else if (embeddedObject is IEmbeddedContentTypeUid)
+                    else
                     {
                         return $"<span> Please find link to: <a {attributeString}><b>{metadata.Text ?? embeddedObject.Uid}</b></a></span>";
                     }
-                    return "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a></span>";
-
                 case Enums.StyleType.Display:
                     if (embeddedObject is IEmbeddedAsset)
                     {

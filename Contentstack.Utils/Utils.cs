@@ -3,6 +3,7 @@ using Contentstack.Utils.Models;
 using HtmlAgilityPack;
 using Contentstack.Utils.Extensions;
 using Contentstack.Utils.Interfaces;
+using System;
 
 namespace Contentstack.Utils
 {
@@ -42,40 +43,23 @@ namespace Contentstack.Utils
 
         private static IEmbeddedObject findEmbeddedObject(Metadata metadata, IEntryEmbedable entryEmbedable)
         {
-            switch (metadata.ItemType)
+        
+            if (entryEmbedable.embeddedItems.Count > 0)
             {
-                case Enums.EmbedItemType.Asset:
-                    if (entryEmbedable.embeddedAssets.Count > 0)
+                foreach (var embed in entryEmbedable.embeddedItems)
+                {
+                    if (embed.Value.Count > 0)
                     {
-                        foreach (var embed in entryEmbedable.embeddedAssets)
+                        IEmbeddedObject embeddedObject = embed.Value.Find(entry => {
+                            Console.WriteLine(entry);
+                            return entry.Uid == metadata.ItemUid && entry.ContentTypeUid == metadata.ContentTypeUid;
+                         });
+                        if (embeddedObject != null)
                         {
-                            if (embed.Value.Count > 0)
-                            {
-                                IEmbeddedAsset embeddedAsset = embed.Value.Find(asset => asset.Uid == metadata.ItemUid);
-                                if (embeddedAsset != null)
-                                {
-                                    return embeddedAsset;
-                                }
-                            }
+                            return embeddedObject;
                         }
                     }
-                    break;
-                case Enums.EmbedItemType.Entry:
-                    if (entryEmbedable.embeddedAssets.Count > 0)
-                    {
-                        foreach (var embed in entryEmbedable.embeddedEntries)
-                        {
-                            if (embed.Value.Count > 0)
-                            {
-                                IEmbeddedObject embeddedObject = embed.Value.Find(entry => entry.Uid == metadata.ItemUid);
-                                if (embeddedObject != null)
-                                {
-                                    return embeddedObject;
-                                }
-                            }
-                        }
-                    }
-                    break;
+                }
             }
             return null;
         }

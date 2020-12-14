@@ -5,13 +5,7 @@ namespace Contentstack.Utils.Interfaces
 {
     public interface IEntryEmbedable
     {
-        Dictionary<string, List<IEmbeddedContentTypeUid>> embeddedEntries
-        {
-            get;
-            set;
-        }
-
-        Dictionary<string, List<IEmbeddedAsset>> embeddedAssets
+        Dictionary<string, List<IEmbeddedObject>> embeddedItems
         {
             get;
             set;

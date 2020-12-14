@@ -46,7 +46,7 @@ namespace Contentstack.Utils.Tests
             doc.LoadHtml(Constants.Constants.kUnexpectedClose);
             doc.FindEmbeddedObject((Metadata metadata) =>
             {
-                Assert.Equal(Enums.EmbedItemType.Asset, metadata.ItemType);
+                Assert.Equal(Enums.EmbedItemType.Entry, metadata.ItemType);
                 Assert.Equal("uid", metadata.ItemUid);
                 Assert.Equal("data-sys-content-type-uid", metadata.ContentTypeUid);
                 Assert.Equal(Enums.StyleType.Inline, metadata.StyleType);
@@ -60,7 +60,7 @@ namespace Contentstack.Utils.Tests
             doc.LoadHtml(Constants.Constants.kNoChildNode);
             doc.FindEmbeddedObject((Metadata metadata) =>
             {
-                Assert.Equal(Enums.EmbedItemType.Asset, metadata.ItemType);
+                Assert.Equal(Enums.EmbedItemType.Entry, metadata.ItemType);
                 Assert.Equal("uid", metadata.ItemUid);
                 Assert.Equal("data-sys-content-type-uid", metadata.ContentTypeUid);
                 Assert.Equal(Enums.StyleType.Inline, metadata.StyleType);
@@ -76,7 +76,7 @@ namespace Contentstack.Utils.Tests
             {
                 Assert.Equal(Enums.EmbedItemType.Asset, metadata.ItemType);
                 Assert.Equal("blt55f6d8cbd7e03a1f", metadata.ItemUid);
-                Assert.Equal("", metadata.ContentTypeUid);
+                Assert.Equal("sys_assets", metadata.ContentTypeUid);
                 Assert.Equal(Enums.StyleType.Display, metadata.StyleType);
                 Assert.Equal("", metadata.Text);
             });
@@ -134,7 +134,7 @@ namespace Contentstack.Utils.Tests
                 {
                     Assert.Equal(Enums.EmbedItemType.Asset, metadata.ItemType);
                     Assert.Equal("blt8d49bb742bcf2c83", metadata.ItemUid);
-                    Assert.Equal("", metadata.ContentTypeUid);
+                    Assert.Equal("sys_assets", metadata.ContentTypeUid);
                     Assert.Equal(Enums.StyleType.Display, metadata.StyleType);
                     Assert.Equal("", metadata.Text);
                     Assert.Equal("blt8d49bb742bcf2c83", metadata.attributes["data-sys-asset-uid"].Value);
@@ -226,7 +226,7 @@ namespace Contentstack.Utils.Tests
                 {
                     Assert.Equal(Enums.EmbedItemType.Asset, metadata.ItemType);
                     Assert.Equal("blt55f6d8cbd7e03a1f", metadata.ItemUid);
-                    Assert.Equal("", metadata.ContentTypeUid);
+                    Assert.Equal("sys_assets", metadata.ContentTypeUid);
                     Assert.Equal(Enums.StyleType.Display, metadata.StyleType);
                     Assert.Equal("", metadata.Text);
                 }

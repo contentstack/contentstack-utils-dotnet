@@ -7,36 +7,30 @@ namespace Contentstack.Utils.Tests.Mocks
     {
         string rte;
 
-        public Dictionary<string, List<IEmbeddedContentTypeUid>> embeddedEntries { get; set; }
-        public Dictionary<string, List<IEmbeddedAsset>> embeddedAssets { get; set; }
+        public Dictionary<string, List<IEmbeddedObject>> embeddedItems { get; set; }
 
-        public EmbeddedModel(string rte, string embedContentUID = "uid", string embedAssetUID = "uid")
+        public EmbeddedModel(string rte, string embedContentUID = "uid", string contentTypeUid = "data-sys-content-type-uid", string embedAssetUID = "uid")
         {
             this.rte = rte;
-            embeddedEntries = new Dictionary<string, List<IEmbeddedContentTypeUid>>()
+            embeddedItems = new Dictionary<string, List<IEmbeddedObject>>()
             {
-                ["rte"] = new List<IEmbeddedContentTypeUid> {
-                    new EmbeddedContentTypeUidModel { Uid = embedContentUID }
-                }
-            };
-            embeddedAssets = new Dictionary<string, List<IEmbeddedAsset>>()
-            {
-                ["rte"] = new List<IEmbeddedAsset> {
+                ["rte"] = new List<IEmbeddedObject> {
+                    new EmbeddedContentTypeUidModel { Uid = embedContentUID, ContentTypeUid = contentTypeUid },
                     new EmbeddedAssetModel { Uid = embedAssetUID }
                 }
             };
         }
-
     }
 
     class Embedded : IEmbeddedObject
     {
         public string Uid { get; set; }
-
+        public string ContentTypeUid { get; set; }
+        
         public string renderString(StyleType styleType, string text = null){
             switch (styleType) {
                 case StyleType.Block:
-                    return "<div><p>" + (this.Uid) + "</p></div>";
+                    return "<div><p>" + (this.Uid) + "</p><p>Content type: <span>" + this.ContentTypeUid + "</span></p></div>";
                 case StyleType.Inline:
                     return "<span>" + this.Uid + "</span>";
                 case StyleType.Link:
@@ -51,19 +45,10 @@ namespace Contentstack.Utils.Tests.Mocks
     }
 
 
-    public class EmbeddedContentTypeUidModel: IEmbeddedContentTypeUid
+    public class EmbeddedContentTypeUidModel: IEmbeddedObject
     {
-        public string ContentTypeUid
-        {
-            get {
-                return "contentTypeUid";
-            }
-            set
-            {
-
-            }
-        }
         public string Uid { get; set; }
+        public string ContentTypeUid { get; set; }
 
         public string renderString(StyleType styleType, string text = null)
         {
@@ -82,20 +67,11 @@ namespace Contentstack.Utils.Tests.Mocks
         }
     }
 
-    public class EmbeddedEntryModel : IEmbeddedContentTypeUid, IEmbeddedEntry
+    public class EmbeddedEntryModel : IEmbeddedEntry
     {
         public string Uid { get; set; }
 
-        public string ContentTypeUid {
-            get
-            {
-                return "contentTypeUid";
-            }
-            set
-            {
-
-            }
-        }
+        public string ContentTypeUid { get; set; }
 
         public string Title
         {
@@ -157,6 +133,18 @@ namespace Contentstack.Utils.Tests.Mocks
             }
             set
             {
+            }
+        }
+
+        public string ContentTypeUid
+        {
+            get
+            {
+                return "sys_assets";
+            }
+            set
+            {
+
             }
         }
 

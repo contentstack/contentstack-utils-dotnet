@@ -27,8 +27,8 @@ namespace Contentstack.Utils.Models
                     string renderString = "<div><p>" + embeddedObject.Uid +"</p>";
                     if (embeddedObject is IEmbeddedEntry) {
                         renderString += "<p>Content type: <span>" + ((IEmbeddedEntry)embeddedObject).Title + "</span></p>";
-                    } else if (embeddedObject is IEmbeddedContentTypeUid) {
-                        renderString += "<p>Content type: <span>" + ((IEmbeddedContentTypeUid)embeddedObject).ContentTypeUid + "</span></p>";
+                    } else {
+                        renderString += "<p>Content type: <span>" + embeddedObject.ContentTypeUid + "</span></p>";
                     }
                     renderString = renderString + "</div>";
                     return renderString;

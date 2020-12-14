@@ -61,21 +61,21 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testEntryBlock()
         {
-            string result = Utils.RenderContent(Constants.Constants.kEntryBlock, new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>contentTypeUid</span></p></div>", result);
+            string result = Utils.RenderContent(Constants.Constants.kEntryBlock, new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
+            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>article</span></p></div>", result);
         }
 
         [Fact]
         public void testEntryInline()
         {
-            string result = Utils.RenderContent(Constants.Constants.kEntryInline, new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            string result = Utils.RenderContent(Constants.Constants.kEntryInline, new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<span>blt55f6d8cbd7e03a1f</span>", result);
         }
 
         [Fact]
         public void testEntryLink()
         {
-            string result = Utils.RenderContent(Constants.Constants.kEntryLink, new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            string result = Utils.RenderContent(Constants.Constants.kEntryLink, new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a>", result);
         }
 
@@ -86,9 +86,9 @@ namespace Contentstack.Utils.Tests
             Assert.Equal("<p></p><p></p>", result);
 
             var embModel = new EmbeddedModel("");
-            embModel.embeddedAssets = new Dictionary<string, List<Interfaces.IEmbeddedAsset>>()
+            embModel.embeddedItems = new Dictionary<string, List<IEmbeddedObject>>()
             {
-                ["rte"] = new List<IEmbeddedAsset> {
+                ["rte"] = new List<IEmbeddedObject> {
                     new EmbeddedAssetModel { Uid = "blt8d49bb742bcf2c83" },
                     new EmbeddedAssetModel { Uid = "blt120a5a04d91c9466" }
                 }
@@ -104,8 +104,8 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}", defaultRender);
             Assert.Equal("", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>contentTypeUid</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a>", result);
+            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
+            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>article</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a>", result);
         }
 
         [Fact]
@@ -114,8 +114,8 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", defaultRender);
             Assert.Equal(" ", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}  {Constants.Constants.kEntryInline}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>contentTypeUid</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a>  <span>blt55f6d8cbd7e03a1f</span>", result);
+            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}  {Constants.Constants.kEntryInline}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
+            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>article</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a>  <span>blt55f6d8cbd7e03a1f</span>", result);
         }
 
         [Fact]
@@ -124,8 +124,8 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", defaultRender);
             Assert.Equal(" ", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>contentTypeUid</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a> <span>blt55f6d8cbd7e03a1f</span>", result);
+            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
+            Assert.Equal("<div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>article</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a> <span>blt55f6d8cbd7e03a1f</span>", result);
         }
 
         [Fact]
@@ -134,8 +134,8 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", defaultRender);
             Assert.Equal(" ", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", embedAssetUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<img src=\"url\" alt=\"title\" /><div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>contentTypeUid</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a> <span>blt55f6d8cbd7e03a1f</span>", result);
+            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new DefaultRenderMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article", embedAssetUID: "blt55f6d8cbd7e03a1f")));
+            Assert.Equal("<img src=\"url\" alt=\"title\" /><div><p>blt55f6d8cbd7e03a1f</p><p>Content type: <span>article</span></p></div><a href=\"blt55f6d8cbd7e03a1f\">{{title}}</a> <span>blt55f6d8cbd7e03a1f</span>", result);
         }
     }
 }

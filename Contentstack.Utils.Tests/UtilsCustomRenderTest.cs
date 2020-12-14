@@ -41,41 +41,41 @@ namespace Contentstack.Utils.Tests
         public void testUnexpectedClose()
         {
             string result = Utils.RenderContent(Constants.Constants.kUnexpectedClose, customRender);
-            Assert.Equal("<span>uid</span>", result);
+            Assert.Equal("<span  class=\"embedded-entry\"  type=\"entry\"  data-sys-entry-uid=\"uid\"  data-sys-content-type-uid=\"data-sys-content-type-uid\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>uid</b></span>", result);
         }
 
         [Fact]
         public void testNoChildmodel()
         {
             string result = Utils.RenderContent(Constants.Constants.kNoChildNode, customRender);
-            Assert.Equal("<span>uid</span>", result);
+            Assert.Equal("<span  class=\"embedded-entry\"  type=\"entry\"  data-sys-entry-uid=\"uid\"  data-sys-content-type-uid=\"data-sys-content-type-uid\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>uid</b></span>", result);
         }
 
         [Fact]
         public void testAssetDisplay()
         {
             string result = Utils.RenderContent(Constants.Constants.kAssetDisplay, new CustomRenderOptionMock(new EmbeddedModel("", embedAssetUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<b>title</b><p>filename image: <img  class=\"embedded-asset\"  type=\"asset\"  data-sys-asset-uid=\"blt55f6d8cbd7e03a1f\"  style=\"display:inline;\"  sys-style-type=\"display\" /></p>", result);
+            Assert.Equal("<b>title</b><p>filename image: <img  class=\"embedded-asset\"  type=\"asset\"  data-sys-asset-uid=\"blt55f6d8cbd7e03a1f\"  style=\"display:inline;\"  data-sys-content-type-uid=\"sys_assets\"  sys-style-type=\"display\" /></p>", result);
         }
 
         [Fact]
         public void testEntryBlock()
         {
-            string result = Utils.RenderContent(Constants.Constants.kEntryBlock, new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            string result = Utils.RenderContent(Constants.Constants.kEntryBlock, new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<div  class=\"embedded-entry block-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  sys-style-type=\"block\"> <b>blt55f6d8cbd7e03a1f</b></div>", result);
         }
 
         [Fact]
         public void testEntryInline()
         {
-            string result = Utils.RenderContent(Constants.Constants.kEntryInline, new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            string result = Utils.RenderContent(Constants.Constants.kEntryInline, new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<span  class=\"embedded-entry inline-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>blt55f6d8cbd7e03a1f</b></span>", result);
         }
 
         [Fact]
         public void testEntryLink()
         {
-            string result = Utils.RenderContent(Constants.Constants.kEntryLink, new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            string result = Utils.RenderContent(Constants.Constants.kEntryLink, new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<span> Please find link to: <a  class=\"embedded-entry link-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"link\"><b>{{title}}</b></a></span>", result);
         }
 
@@ -86,16 +86,16 @@ namespace Contentstack.Utils.Tests
             Assert.Equal("<p></p><p></p>", result);
 
             var embModel = new EmbeddedModel("");
-            embModel.embeddedAssets = new Dictionary<string, List<Interfaces.IEmbeddedAsset>>()
+            embModel.embeddedItems = new Dictionary<string, List<IEmbeddedObject>>()
             {
-                ["rte"] = new List<IEmbeddedAsset> {
+                ["rte"] = new List<IEmbeddedObject> {
                     new EmbeddedAssetModel { Uid = "blt8d49bb742bcf2c83" },
                     new EmbeddedAssetModel { Uid = "blt120a5a04d91c9466" }
                 }
             };
 
             result = Utils.RenderContent(Constants.Constants.kAssetEmbed, new CustomRenderOptionMock(embModel));
-            Assert.Equal("<b>title</b><p>filename image: <img  class=\"embedded-asset\"  data-sys-asset-filelink=\"https://images.contentstack.com/v3/assets/blt77263d300aee3e6b/blt8d49bb742bcf2c83/5f744bfcb3d3d20813386c10/clitud.jpeg\"  data-sys-asset-uid=\"blt8d49bb742bcf2c83\"  data-sys-asset-filename=\"Cuvier-67_Autruche_d_Afrique.jpg\"  data-sys-asset-contenttype=\"image/jpeg\"  data-sys-asset-alt=\"Cuvier-67_Autruche_d_Afrique.jpg\"  data-sys-asset-caption=\"somecaption\"  data-sys-asset-link=\"http://abc.com\"  data-sys-asset-position=\"center\"  data-sys-asset-isnewtab=\"true\"  type=\"asset\"  sys-style-type=\"display\" /></p><p></p><p></p><b>title</b><p>filename image: <img  class=\"embedded-asset\"  data-redactor-type=\"embed\"  data-widget-code=\"\"  data-sys-asset-filelink=\"https://images.contentstack.com/v3/assets/blt77263d300aee3e6b/blt120a5a04d91c9466/5ebb86965a68ad069038b729/iphone-mockup.png\"  data-sys-asset-uid=\"blt120a5a04d91c9466\"  data-sys-asset-filename=\"iphone-mockup.png\"  data-sys-asset-contenttype=\"image/png\"  type=\"asset\"  sys-style-type=\"display\" /></p>", result);
+            Assert.Equal("<b>title</b><p>filename image: <img  class=\"embedded-asset\"  data-sys-asset-filelink=\"https://images.contentstack.com/v3/assets/blt77263d300aee3e6b/blt8d49bb742bcf2c83/5f744bfcb3d3d20813386c10/clitud.jpeg\"  data-sys-asset-uid=\"blt8d49bb742bcf2c83\"  data-sys-asset-filename=\"Cuvier-67_Autruche_d_Afrique.jpg\"  data-sys-asset-contenttype=\"image/jpeg\"  data-sys-asset-alt=\"Cuvier-67_Autruche_d_Afrique.jpg\"  data-sys-asset-caption=\"somecaption\"  data-sys-asset-link=\"http://abc.com\"  data-sys-asset-position=\"center\"  data-sys-asset-isnewtab=\"true\"  data-sys-content-type-uid=\"sys_assets\"  type=\"asset\"  sys-style-type=\"display\" /></p><p></p><p></p><b>title</b><p>filename image: <img  class=\"embedded-asset\"  data-redactor-type=\"embed\"  data-widget-code=\"\"  data-sys-asset-filelink=\"https://images.contentstack.com/v3/assets/blt77263d300aee3e6b/blt120a5a04d91c9466/5ebb86965a68ad069038b729/iphone-mockup.png\"  data-sys-asset-uid=\"blt120a5a04d91c9466\"  data-sys-asset-filename=\"iphone-mockup.png\"  data-sys-asset-contenttype=\"image/png\"  data-sys-content-type-uid=\"sys_assets\"  type=\"asset\"  sys-style-type=\"display\" /></p>", result);
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}", customRender);
             Assert.Equal("", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<div  class=\"embedded-entry block-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  sys-style-type=\"block\"> <b>blt55f6d8cbd7e03a1f</b></div><span> Please find link to: <a  class=\"embedded-entry link-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"link\"><b>{{title}}</b></a></span>", result);
         }
 
@@ -114,7 +114,7 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", customRender);
             Assert.Equal(" ", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}  {Constants.Constants.kEntryInline}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            result = Utils.RenderContent($"{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink}  {Constants.Constants.kEntryInline}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<div  class=\"embedded-entry block-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  sys-style-type=\"block\"> <b>blt55f6d8cbd7e03a1f</b></div><span> Please find link to: <a  class=\"embedded-entry link-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"link\"><b>{{title}}</b></a></span>  <span  class=\"embedded-entry inline-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>blt55f6d8cbd7e03a1f</b></span>", result);
         }
 
@@ -124,7 +124,7 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", customRender);
             Assert.Equal(" ", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f")));
+            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article")));
             Assert.Equal("<div  class=\"embedded-entry block-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  sys-style-type=\"block\"> <b>blt55f6d8cbd7e03a1f</b></div><span> Please find link to: <a  class=\"embedded-entry link-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"link\"><b>{{title}}</b></a></span> <span  class=\"embedded-entry inline-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>blt55f6d8cbd7e03a1f</b></span>", result);
         }
 
@@ -134,8 +134,8 @@ namespace Contentstack.Utils.Tests
             string result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", customRender);
             Assert.Equal(" ", result);
 
-            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", embedAssetUID: "blt55f6d8cbd7e03a1f")));
-            Assert.Equal("<b>title</b><p>filename image: <img  class=\"embedded-asset\"  type=\"asset\"  data-sys-asset-uid=\"blt55f6d8cbd7e03a1f\"  style=\"display:inline;\"  sys-style-type=\"display\" /></p><div  class=\"embedded-entry block-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  sys-style-type=\"block\"> <b>blt55f6d8cbd7e03a1f</b></div><span> Please find link to: <a  class=\"embedded-entry link-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"link\"><b>{{title}}</b></a></span> <span  class=\"embedded-entry inline-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>blt55f6d8cbd7e03a1f</b></span>", result);
+            result = Utils.RenderContent($"{Constants.Constants.kAssetDisplay}{Constants.Constants.kEntryBlock}{Constants.Constants.kEntryLink} {Constants.Constants.kEntryInline}", new CustomRenderOptionMock(new EmbeddedModel("", embedContentUID: "blt55f6d8cbd7e03a1f", contentTypeUid: "article", embedAssetUID: "blt55f6d8cbd7e03a1f")));
+            Assert.Equal("<b>title</b><p>filename image: <img  class=\"embedded-asset\"  type=\"asset\"  data-sys-asset-uid=\"blt55f6d8cbd7e03a1f\"  style=\"display:inline;\"  data-sys-content-type-uid=\"sys_assets\"  sys-style-type=\"display\" /></p><div  class=\"embedded-entry block-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  sys-style-type=\"block\"> <b>blt55f6d8cbd7e03a1f</b></div><span> Please find link to: <a  class=\"embedded-entry link-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"link\"><b>{{title}}</b></a></span> <span  class=\"embedded-entry inline-entry\"  type=\"entry\"  data-sys-entry-uid=\"blt55f6d8cbd7e03a1f\"  data-sys-content-type-uid=\"article\"  style=\"display:inline;\"  sys-style-type=\"inline\"><b>blt55f6d8cbd7e03a1f</b></span>", result);
         }
     }
 }
