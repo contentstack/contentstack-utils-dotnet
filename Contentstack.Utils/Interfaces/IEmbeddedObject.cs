@@ -8,10 +8,6 @@ namespace Contentstack.Utils.Interfaces
             get;
             set;
         }
-    }
-
-    public interface IEmbeddedContentTypeUid: IEmbeddedObject
-    {
         string ContentTypeUid
         {
             get;
