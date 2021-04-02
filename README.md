@@ -53,18 +53,18 @@ public  class CustomRenderOption: Options
 		switch (metadata.StyleType)  
 			{
 
-		//if you have added embedded object using the “Block” option  
-		case StyleType.Block:  
-			string renderString = "";  
-			if (embeddedObject is IEmbeddedEntry)  
-			{  
-				renderString += $"<div> <b>{((IEmbeddedEntry)embeddedObject).Title}</b></div>";  
-			}  
-			else  if (embeddedObject is IEmbeddedContentTypeUid)  
-			{  
-				renderString += $"<div> <b>{embeddedObject.Uid}</b></div>";  
-			}  
-			return renderString;  
+			//if you have added embedded object using the “Block” option  
+			case StyleType.Block:  
+				string renderString = "";  
+				if (embeddedObject is IEmbeddedEntry)  
+				{  
+					renderString += $"<div> <b>{((IEmbeddedEntry)embeddedObject).Title}</b></div>";  
+				}  
+				else  if (embeddedObject is IEmbeddedContentTypeUid)  
+				{  
+					renderString += $"<div> <b>{embeddedObject.Uid}</b></div>";  
+				}  
+				return renderString;  
 			
 			//if you have added embedded object using the “Inline” option
 			case StyleType.Inline:  
