@@ -1,17 +1,13 @@
-﻿using Contentstack.Utils.Interfaces;
+﻿using Contentstack.Utils.Enums;
+using Contentstack.Utils.Interfaces;
 
 namespace Contentstack.Utils.Models
 {
     public class Options: IRenderable
     {
-        #region Internal Constructors
-        internal Options()
-        {
-
-        }
-        #endregion
-
-        #region Public
+        #region #region Public
+        public Options() {}
+        
         public Options(IEntryEmbedable entry)
         {
             this.entry = entry;
@@ -60,6 +56,27 @@ namespace Contentstack.Utils.Models
                     return "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid)+ "</a>";
             }
             return "";
+        }
+
+        public string RenderMark(MarkType markType, string text)
+        {
+            switch (markType) {
+                case MarkType.Bold:
+                    return "<strong>"+text+"</strong>";
+                case MarkType.Italic:
+                    return "<em>"+text+"</em>";
+                case MarkType.Underline:
+                    return "<u>"+text+"</u>";
+                case MarkType.Strikethrough:
+                    return "<strike>"+text+"</strike>";
+                case MarkType.InlineCode:
+                    return "<span>"+text+"</span>";
+                case MarkType.Subscript:
+                    return "<sub>" + text + "</sub>";
+                case MarkType.Superscript:
+                    return "<sup>"+text+"</sup>";
+            }
+            return text;
         }
         #endregion
     }
