@@ -6,6 +6,10 @@ namespace Contentstack.Utils.Tests.Mocks
 {
     public class DefaultRenderMock : Options
     {
+        public DefaultRenderMock() : base()
+        {
+        }
+
         public DefaultRenderMock(IEntryEmbedable entry) : base(entry)
         {
         }

@@ -137,5 +137,24 @@ namespace Contentstack.Utils.Tests
             string downloadString = defaultRender.RenderOption(embeddedAsset, getMetadata(styleType: StyleType.Download, text: text));
             Assert.Equal(embeddedAsset.renderString(StyleType.Download, text), downloadString);
         }
+
+        [Fact]
+        public void testRenderMark()
+        {
+            string boldString = defaultRender.RenderMark(MarkType.Bold, text);
+            Assert.Equal("<strong>"+text+"</strong>", boldString);
+            string italicString = defaultRender.RenderMark(MarkType.Italic, text: text);
+            Assert.Equal("<em>"+text+"</em>", italicString);
+            string underlineString = defaultRender.RenderMark(MarkType.Underline, text: text);
+            Assert.Equal("<u>"+text+"</u>", underlineString);
+            string strickthroughString = defaultRender.RenderMark(MarkType.Strikethrough, text: text);
+            Assert.Equal("<strike>"+text+"</strike>", strickthroughString);
+            string inlineCodeString = defaultRender.RenderMark(MarkType.InlineCode, text: text);
+            Assert.Equal("<span>"+text+"</span>", inlineCodeString);
+            string subscriptString = defaultRender.RenderMark(MarkType.Subscript, text: text);
+            Assert.Equal("<sub>"+text+"</sub>", subscriptString);
+            string superscriptString = defaultRender.RenderMark(MarkType.Superscript, text: text);
+            Assert.Equal("<sup>"+text+"</sup>", superscriptString);
+        }
     }
 }
