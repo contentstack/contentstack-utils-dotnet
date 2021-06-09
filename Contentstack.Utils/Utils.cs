@@ -75,7 +75,7 @@ namespace Contentstack.Utils
                 case Enums.NodeType.Reference:
                     return referenceToHtml(node, options);
             }
-            return "";
+            return options.RenderNode(node.type, node, (nodes) => { return nodeChildrenToHtml(nodes, options); });
         }
 
         private static string referenceToHtml(Node node, Options options)
