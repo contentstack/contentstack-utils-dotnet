@@ -47,7 +47,31 @@ public  class CustomRenderOption: Options
 {  
 	public CustomRenderOption(IEntryEmbedable entry) : base(entry)  
 	{  
-	}  
+	}
+	public override string RenderMark(MarkType markType, string text)
+    {
+        switch (markType)
+        {
+            case MarkType.Bold:
+                return $"<b>{text}</b>";
+            default:
+                return base.RenderMark(markType: markType, text: text);
+        }
+    }
+
+    public override string RenderNode(NodeType nodeType, Node node, NodeChildrenCallBack callBack)
+    {
+        switch (nodeType)
+        {
+            case NodeType.Paragraph:
+                return $"<p class='class-id'>{callBack(node.children)}</p>";
+            case NodeType.Heading_1:
+                return "<h1 class='class-id'>{necallBackxt(node.children)}</h1>";
+            default:
+                return base.RenderNode(nodeType, node, callBack);
+        }
+    }
+
 	public  override  string RenderOption(IEmbeddedObject embeddedObject, Metadata metadata)  
 	{  
 		switch (metadata.StyleType)  
@@ -127,15 +151,16 @@ CustomRenderOption defaultRender = new CustomRenderOption(entry);
 Contentstack Utils SDK lets you interact with the Content Delivery APIs and retrieve embedded items from the RTE field of an entry.
 
 ### Fetch Embedded Item(s) from a Single Entry
+#### Render HTML RTE Embedded object
 
-To get an embedded item of a single entry, you need to provide the stack API key, environment name, delivery token, content type and entry UID:
+To get an embedded item of a single entry, you need to provide the stack API key, environment name, delivery token, content type and entry UID. Then, use the `ContentstackUtils.RenderContent` functions as shown below::
 ```c#		
 using Contentstack.Core; // ContentstackClient  
 using Contentstack.Core.Models; // Stack, Query, Entry, Asset, ContentType, ContentstackCollection  
 using Contentstack.Core.Configuration; // ContentstackOptions  
 using Contentstack.Utils; // Utils.RenderContent  
 Using Contentstack.Utils.Models; // Options, Metadata  
-ContentstackClient client = new ContentstackClient("api_key", "delivery_token", "enviroment_name");  
+ContentstackClient client = new ContentstackClient("api_key", "delivery_token", "environment_name");  
   
 client.ContentType("product").Entry("<entry_uid>");  
 	.includeEmbeddedItems()
@@ -149,9 +174,31 @@ client.ContentType("product").Entry("<entry_uid>");
 });
   ```
 
-### Fetch Embedded Item(s) from Multiple Entries
+#### Render Supercharged RTE contents
 
-To get embedded items from multiple entries, you need to provide the stack API key, environment name, delivery token, content type UID. You can use the path variable in case the entries have multiple RTE fields.
+To get a single entry, you need to provide the stack API key, environment name, delivery token, content type and entry UID. Then, use `Utils.JsonToHtml` function as shown below:
+```c#		
+using Contentstack.Core; // ContentstackClient  
+using Contentstack.Core.Models; // Stack, Query, Entry, Asset, ContentType, ContentstackCollection  
+using Contentstack.Core.Configuration; // ContentstackOptions  
+using Contentstack.Utils; // Utils.RenderContent  
+Using Contentstack.Utils.Models; // Options, Metadata  
+ContentstackClient client = new ContentstackClient("api_key", "delivery_token", "environment_name");  
+  
+client.ContentType("product").Entry("<entry_uid>");  
+	.includeEmbeddedItems()
+	.Fetch<Product>().ContinueWith((response) => {  
+		if (!response.IsFaulted) {
+			// To use the default render option:
+			string result = Utils.JsonToHtml(response.result.rte, new Option(response.result));
+			// To use the Custom render option:  
+			string result = Utils.JsonToHtml(response.result.rte, new CustomRenderOption(response.result));  
+		}  
+});
+  ```
+### Fetch Embedded Item(s) from Multiple Entries
+#### Render HTML RTE Embedded object
+To get embedded items from multiple entries, you need to provide the stack API key, environment name, delivery token, content type UID. Then, use the `ContentstackUtils.RenderContent` functions as shown below:
 ```c#
 using Contentstack.Core; // ContentstackClient  
 using Contentstack.Core.Models; // Stack, Query, Entry, Asset, ContentType, ContentstackCollection  
@@ -159,7 +206,7 @@ using Contentstack.Core.Configuration; // ContentstackOptions
 using Contentstack.Utils; // Utils.RenderContent  
 Using Contentstack.Utils.Models; // Options, Metadata  
   
-ContentstackClient client = new ContentstackClient("api_key", "delivery_token", "enviroment_name");  
+ContentstackClient client = new ContentstackClient("api_key", "delivery_token", "environment_name");  
   
 client.ContentType("product").Query()  
 	.includeEmbeddedItems();  
@@ -172,6 +219,35 @@ client.ContentType("product").Query()
 				string result = Utils.RenderContent(product.rte, new Option(product));  
 				// To use the Custom render option  
 				string result = Utils.RenderContent(product.rte, new CustomRenderOption(product));  
+			}  
+		}  
+	});
+```
+
+
+#### Render Supercharged RTE contents
+To get embedded items from multiple entries, you need to provide the stack API key, environment name, delivery token, content type UID. Then, use `Utils.jsonToHtml` function as shown below:
+
+```c#
+using Contentstack.Core; // ContentstackClient  
+using Contentstack.Core.Models; // Stack, Query, Entry, Asset, ContentType, ContentstackCollection  
+using Contentstack.Core.Configuration; // ContentstackOptions  
+using Contentstack.Utils; // Utils.RenderContent  
+Using Contentstack.Utils.Models; // Options, Metadata  
+  
+ContentstackClient client = new ContentstackClient("api_key", "delivery_token", "environment_name");  
+  
+client.ContentType("product").Query()  
+	.includeEmbeddedItems();  
+	.Find<Product>().ContinueWith((t) => {  
+		if (!t.IsFaulted) {  
+			ContentstackCollection<Product> result = t.Result;  
+			foreach (var product in result.Items)  
+			{  
+				// To use the default render option  
+				string result = Utils.JsonToHtml(product.rte, new Option(product));  
+				// To use the Custom render option  
+				string result = Utils.JsonToHtml(product.rte, new CustomRenderOption(product));  
 			}  
 		}  
 	});
