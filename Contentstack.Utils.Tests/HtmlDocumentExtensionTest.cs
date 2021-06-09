@@ -137,15 +137,15 @@ namespace Contentstack.Utils.Tests
                     Assert.Equal("sys_assets", metadata.ContentTypeUid);
                     Assert.Equal(Enums.StyleType.Display, metadata.StyleType);
                     Assert.Equal("", metadata.Text);
-                    Assert.Equal("blt8d49bb742bcf2c83", metadata.attributes["data-sys-asset-uid"].Value);
-                    Assert.Equal("Cuvier-67_Autruche_d_Afrique.jpg", metadata.attributes["data-sys-asset-alt"].Value);
-                    Assert.Equal("http://abc.com", metadata.attributes["data-sys-asset-link"].Value);
-                    Assert.Equal("https://images.contentstack.com/v3/assets/blt77263d300aee3e6b/blt8d49bb742bcf2c83/5f744bfcb3d3d20813386c10/clitud.jpeg", metadata.attributes["data-sys-asset-filelink"].Value);
-                    Assert.Equal("center", metadata.attributes["data-sys-asset-position"].Value);
-                    Assert.Equal("somecaption", metadata.attributes["data-sys-asset-caption"].Value);
-                    Assert.Equal("image/jpeg", metadata.attributes["data-sys-asset-contenttype"].Value);
-                    Assert.Equal("true", metadata.attributes["data-sys-asset-isnewtab"].Value);
-                    Assert.Equal("Cuvier-67_Autruche_d_Afrique.jpg", metadata.attributes["data-sys-asset-filename"].Value);
+                    Assert.Equal("blt8d49bb742bcf2c83", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-uid"].Value);
+                    Assert.Equal("Cuvier-67_Autruche_d_Afrique.jpg", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-alt"].Value);
+                    Assert.Equal("http://abc.com", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-link"].Value);
+                    Assert.Equal("https://image.contentstack.com/v3/5f74813386c10/clitud.jpeg", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-filelink"].Value);
+                    Assert.Equal("center", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-position"].Value);
+                    Assert.Equal("somecaption", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-caption"].Value);
+                    Assert.Equal("image/jpeg", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-contenttype"].Value);
+                    Assert.Equal("true", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-isnewtab"].Value);
+                    Assert.Equal("Cuvier-67_Autruche_d_Afrique.jpg", ((HtmlAttributeCollection)metadata.attributes)["data-sys-asset-filename"].Value);
                 }
             });
         }

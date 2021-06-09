@@ -72,6 +72,19 @@ namespace Contentstack.Utils
             {
                 case Enums.NodeType.Text:
                     return textToHtml((TextNode)node, options);
+                case Enums.NodeType.Reference:
+                    return referenceToHtml(node, options);
+            }
+            return "";
+        }
+
+        private static string referenceToHtml(Node node, Options options)
+        {
+            Metadata metadata = node;
+            IEmbeddedObject embeddedObject = findEmbeddedObject(metadata, options.entry);
+            if (embeddedObject != null)
+            {
+                return options.RenderOption(embeddedObject, metadata);
             }
             return "";
         }
@@ -113,7 +126,7 @@ namespace Contentstack.Utils
         private static IEmbeddedObject findEmbeddedObject(Metadata metadata, IEntryEmbedable entryEmbedable)
         {
         
-            if (entryEmbedable.embeddedItems.Count > 0)
+            if (entryEmbedable != null && entryEmbedable.embeddedItems.Count > 0)
             {
                 foreach (var embed in entryEmbedable.embeddedItems)
                 {

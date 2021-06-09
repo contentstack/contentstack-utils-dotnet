@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Contentstack.Utils.Interfaces;
 using Contentstack.Utils.Models;
+using HtmlAgilityPack;
 
 namespace Contentstack.Utils.Tests.Mocks
 {
@@ -12,7 +13,7 @@ namespace Contentstack.Utils.Tests.Mocks
         public override string RenderOption(IEmbeddedObject embeddedObject, Metadata metadata)
         {
             var attributeStringList = new List<string>();
-            foreach (var attribute in metadata.attributes)
+            foreach (var attribute in (HtmlAttributeCollection)metadata.attributes)
             {
                 attributeStringList.Add($" {attribute.Name}=\"{attribute.Value}\"");
             }
