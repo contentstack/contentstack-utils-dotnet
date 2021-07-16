@@ -14,7 +14,7 @@ namespace Contentstack.Utils.Converters
             if (jObject["type"] == null)
             {
                 node = new TextNode();
-                node.type = Enums.NodeType.Text;
+                node.type = "text";
             }else
             {
                 node = new Node();

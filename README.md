@@ -59,13 +59,13 @@ public  class CustomRenderOption: Options
         }
     }
 
-    public override string RenderNode(NodeType nodeType, Node node, NodeChildrenCallBack callBack)
+    public override string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
     {
         switch (nodeType)
         {
-            case NodeType.Paragraph:
+            case "p":
                 return $"<p class='class-id'>{callBack(node.children)}</p>";
-            case NodeType.Heading_1:
+            case "h1":
                 return "<h1 class='class-id'>{necallBackxt(node.children)}</h1>";
             default:
                 return base.RenderNode(nodeType, node, callBack);
@@ -153,7 +153,7 @@ Contentstack Utils SDK lets you interact with the Content Delivery APIs and retr
 ### Fetch Embedded Item(s) from a Single Entry
 #### Render HTML RTE Embedded object
 
-To get an embedded item of a single entry, you need to provide the stack API key, environment name, delivery token, content type and entry UID. Then, use the `ContentstackUtils.RenderContent` functions as shown below::
+To get an embedded item of a single entry, you need to provide the stack API key, environment name, delivery token, content type and entry UID. Then, use the `Utils.RenderContent` functions as shown below:
 ```c#		
 using Contentstack.Core; // ContentstackClient  
 using Contentstack.Core.Models; // Stack, Query, Entry, Asset, ContentType, ContentstackCollection  
@@ -198,7 +198,7 @@ client.ContentType("product").Entry("<entry_uid>");
   ```
 ### Fetch Embedded Item(s) from Multiple Entries
 #### Render HTML RTE Embedded object
-To get embedded items from multiple entries, you need to provide the stack API key, environment name, delivery token, content type UID. Then, use the `ContentstackUtils.RenderContent` functions as shown below:
+To get embedded items from multiple entries, you need to provide the stack API key, environment name, delivery token, content type UID. Then, use the `Utils.RenderContent` functions as shown below:
 ```c#
 using Contentstack.Core; // ContentstackClient  
 using Contentstack.Core.Models; // Stack, Query, Entry, Asset, ContentType, ContentstackCollection  

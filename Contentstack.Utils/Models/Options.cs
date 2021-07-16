@@ -1,4 +1,5 @@
-﻿using Contentstack.Utils.Enums;
+﻿using System;
+using Contentstack.Utils.Enums;
 using Contentstack.Utils.Interfaces;
 
 namespace Contentstack.Utils.Models
@@ -85,69 +86,68 @@ namespace Contentstack.Utils.Models
             return text;
         }
 
-        public virtual string RenderNode(NodeType nodeType, Node node, NodeChildrenCallBack callBack)
+        public virtual string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
         {
             string href = "";
-
             switch (nodeType)
             {
-                case NodeType.Paragraph:
+                case "p":
                     return $"<p>{callBack(node.children)}</p>";
-                case NodeType.Link:
+                case "a":
                     if (node.attrs.ContainsKey("url"))
                     {
                         href = (string)node.attrs["url"];
                     }
                     return $"<a href=\"{href}\">{callBack(node.children)}</a>";
-                case NodeType.Image:
+                case "img":
                     if (node.attrs.ContainsKey("url"))
                     {
                         href = (string)node.attrs["url"];
                     }
                     return $"<img src=\"{href}\" />{callBack(node.children)}";
-                case NodeType.Embed:
+                case "embed":
                     if (node.attrs.ContainsKey("url"))
                     {
                         href = (string)node.attrs["url"];
                     }
                     return $"<iframe src=\"{href}\">{callBack(node.children)}</iframe>";
-                case NodeType.Heading_1:
+                case "h1":
                     return $"<h1>{callBack(node.children)}</h1>";
-                case NodeType.Heading_2:
+                case "h2":
                     return $"<h2>{callBack(node.children)}</h2>";
-                case NodeType.Heading_3:
+                case "h3":
                     return $"<h3>{callBack(node.children)}</h3>";
-                case NodeType.Heading_4:
+                case "h4":
                     return $"<h4>{callBack(node.children)}</h4>";
-                case NodeType.Heading_5:
+                case "h5":
                     return $"<h5>{callBack(node.children)}</h5>";
-                case NodeType.Heading_6:
+                case "h6":
                     return $"<h6>{callBack(node.children)}</h6>";
-                case NodeType.OrderList:
+                case "ol":
                     return $"<ol>{callBack(node.children)}</ol>";
-                case NodeType.UnOrderList:
+                case "ul":
                     return $"<ul>{callBack(node.children)}</ul>";
-                case NodeType.ListItem:
+                case "li":
                     return $"<li>{callBack(node.children)}</li>";
-                case NodeType.Hr:
+                case "hr":
                     return $"<hr>";
-                case NodeType.Table:
+                case "table":
                     return $"<table>{callBack(node.children)}</table>";
-                case NodeType.TableHeader:
+                case "thead":
                     return $"<thead>{callBack(node.children)}</thead>";
-                case NodeType.TableBody:
+                case "tbody":
                     return $"<tbody>{callBack(node.children)}</tbody>";
-                case NodeType.TableFooter:
+                case "tfoot":
                     return $"<tfoot>{callBack(node.children)}</tfoot>";
-                case NodeType.TableRow:
+                case "tr":
                     return $"<tr>{callBack(node.children)}</tr>";
-                case NodeType.TableHead:
+                case "th":
                     return $"<th>{callBack(node.children)}</th>";
-                case NodeType.TableData:
+                case "td":
                     return $"<td>{callBack(node.children)}</td>";
-                case NodeType.BlockQuote:
+                case "blockquote":
                     return $"<blockquote>{callBack(node.children)}</blockquote>";
-                case NodeType.Code:
+                case "code":
                     return $"<code>{callBack(node.children)}</code>";
                 default:
                     return callBack(node.children);
