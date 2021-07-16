@@ -36,7 +36,7 @@ namespace Contentstack.Utils.Models
         /// <summary>
         /// Attributes collection for embed tag
         /// </summary>
-        public HtmlAttributeCollection attributes;
+        public object attributes;
 
         /// <summary>
         /// Html string of embed tag
@@ -66,6 +66,46 @@ namespace Contentstack.Utils.Models
                 ContentTypeUid = node.Attributes["data-sys-content-type-uid"] != null ? node.Attributes["data-sys-content-type-uid"].Value : "",
                 attributes = node.Attributes
             };
+        }
+
+        public static implicit operator Metadata(Node node) 
+        {
+            StyleType styleType;
+            if (!node.attrs.ContainsKey("display-type") || !(Enum.TryParse((string)node.attrs["display-type"], true, out styleType)))
+            {
+                styleType = StyleType.Block;
+            }
+
+            EmbedItemType embedItemType;
+            if (!node.attrs.ContainsKey("type") || !(Enum.TryParse((string)node.attrs["type"], true, out embedItemType)))
+            {
+                embedItemType = EmbedItemType.Entry;
+            }
+            string text = "";
+            if (node.children != null && node.children.Count > 0 && node.children[0].GetType() == typeof(TextNode))
+            {
+                text = ((TextNode)node.children[0]).text;
+            }
+            string itemUID = "";
+            if (node.attrs.ContainsKey("entry-uid"))
+            {
+                itemUID = (string)node.attrs["entry-uid"];
+            }else if (node.attrs.ContainsKey("asset-uid"))
+            {
+                itemUID = (string)node.attrs["asset-uid"];
+            }
+
+            return new Metadata()
+            {
+                Text = text,
+                OuterHTML = "",
+                StyleType = styleType,
+                ItemType = embedItemType,
+                ItemUid = itemUID,
+                ContentTypeUid = node.attrs.ContainsKey("content-type-uid") ? (string)node.attrs["content-type-uid"] : "",
+                attributes = node.attrs
+            };
+
         }
     }
 }
