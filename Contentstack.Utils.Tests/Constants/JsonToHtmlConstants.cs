@@ -44,5 +44,15 @@
         public const string kEntryReferenceLinkJson = "{ \"uid\":\"06e34a7  5e4 e549d\", \"_version\":1, \"attrs\":{ }, \"children\":[{\"uid\":\"7626ea98e0e95d602210\",\"type\":\"reference\",\"attrs\":{\"target\":\"_self\",\"href\":\"/copy-of-entry-final-02\",\"display-type\":\"link\",\"entry-uid\":\"bltemmbedEntryuid\",\"content-type-uid\":\"embeddedrte\",\"locale\":\"en-us\",\"type\":\"entry\",\"class-name\":\"embedded-entry\"},\"children\":[{\"text\":\"/copy-of-entry-final-02\"}]}],\"type\":\"doc\"}";
         public const string kEntryReferenceInlineJson = "{ \"uid\":\"06e34a7  5e4 e549d\", \"_version\":1, \"attrs\":{ }, \"children\":[{\"uid\":\"506 4878f3f46 s21f0cbc aff\",\"type\":\"reference\",\"attrs\":{\"display-type\":\"inline\",\"entry-uid\":\"blttitleUpdateuid\",\"content-type-uid\":\"embeddedrte\",\"locale\":\"en-us\",\"type\":\"entry\",\"class-name\":\"embedded-entry\"},\"children\":[{\"text\":\"\"}]}],\"type\":\"doc\"}";
         public const string kHRJson = "{ \"uid\":\"06e34a7  5e4 e549d\", \"_version\":1, \"attrs\":{ }, \"children\":[{\"uid\":\"f5a7b57 40a8a5c3 576828276b\",\"type\":\"hr\",\"children\":[{\"text\":\"\"}],\"attrs\":{ }}],\"type\":\"doc\"}";
+
+
+        public const string KAssetNode = "\"embedded_itemsConnection\": { \"edges\": [{ \"node\": { \"system\": { \"content_type_uid\": \"sys_assets\", \"uid\": \"blt44asset\" }, \"created_at\": \"2020-08-19T09:13:32.785Z\", \"updated_at\": \"2020-08-19T09:13:32.785Z\", \"created_by\": \"bltcreate\", \"updated_by\": \"bltcreate\", \"content_type\": \"application/pdf\", \"file_size\": \"13264\", \"filename\": \"dummy.pdf\", \"url\":\"/v3/assets/blt333/blt44asset/dummy.pdf\", \"_version\": 1, \"title\": \"dummy.pdf\" } } ]}";
+        public const string KEntryBlocNode = "\"embedded_itemsConnection\": { \"edges\": [{ \"node\": { \"title\": \"Update this title\", \"url\": \"\", \"locale\": \"en-us\", \"system\": { \"uid\": \"blttitleuid\", \"content_type_uid\": \"content_block\" }, \"_version\": 5, \"_in_progress\": false, \"multi_line\": \"\", \"rich_text_editor\": \"\" } } ]}";
+        public const string KEntryLinkNode = "\"embedded_itemsConnection\": { \"edges\": [{ \"node\": { \"title\": \"Entry with embedded entry\", \"rich_text_editor\": [ \"\" ], \"locale\": \"en-us\", \"system\": { \"uid\": \"bltemmbedEntryuid\", \"content_type_uid\": \"embeddedrte\" }, \"_in_progress\": false } } ]}";
+        public const string KEntryInlineNode = "\"embedded_itemsConnection\": { \"edges\": [{ \"node\": { \"title\": \"updated title\", \"rich_text_editor\": [ \"\" ], \"locale\": \"en-us\", \"system\": { \"uid\": \"blttitleUpdateuid\", \"content_type_uid\": \"embeddedrte\", }, \"_in_progress\": false } } ]}";
+        public static string KGQLModel(string node, string embedConnection = null)
+        {
+            return $"{{\"multiplerte\":{{\"json\":[{node}]{(embedConnection != null ? ","+embedConnection : "")} }}, \"singlerte\":{{\"json\":{node}{(embedConnection != null ? "," + embedConnection : "")}}} }}";
+        }
     }
 }

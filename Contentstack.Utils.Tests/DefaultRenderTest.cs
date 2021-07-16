@@ -4,6 +4,7 @@ using Contentstack.Utils.Tests.Mocks;
 using Contentstack.Utils.Enums;
 using Contentstack.Utils.Tests.Helpers;
 using Contentstack.Utils.Tests.Constants;
+using System;
 
 namespace Contentstack.Utils.Tests
 {
@@ -165,7 +166,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testParagraphDocument ()
         {
-            string result = defaultRender.RenderNode(NodeType.Paragraph, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("p", node, (nodes) => { return text; });
 
             Assert.Equal($"<p>{text}</p>", result);
         }
@@ -175,7 +176,7 @@ namespace Contentstack.Utils.Tests
         {
             Node nodeLink = NodeParser.parse(JsonToHtmlConstants.kLinkInPJson).children[0].children[1];
 
-            string result = defaultRender.RenderNode(NodeType.Link, nodeLink, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("a", nodeLink, (nodes) => { return text; });
 
             Assert.Equal($"<a href=\"{nodeLink.attrs["url"]}\">{text}</a>", result);
         }
@@ -183,7 +184,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testImageDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.Image, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("img", node, (nodes) => { return text; });
 
             Assert.Equal($"<img src=\"\" />{text}", result);
         }
@@ -191,7 +192,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testEmbedDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.Embed, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("embed", node, (nodes) => { return text; });
 
             Assert.Equal($"<iframe src=\"\">{text}</iframe>", result);
         }
@@ -199,7 +200,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testH1Document()
         {
-            string result = defaultRender.RenderNode(NodeType.Heading_1, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("h1", node, (nodes) => { return text; });
 
             Assert.Equal($"<h1>{text}</h1>", result);
         }
@@ -207,7 +208,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testH2Document()
         {
-            string result = defaultRender.RenderNode(NodeType.Heading_2, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("h2", node, (nodes) => { return text; });
 
             Assert.Equal($"<h2>{text}</h2>", result);
         }
@@ -215,7 +216,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testH3Document()
         {
-            string result = defaultRender.RenderNode(NodeType.Heading_3, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("h3", node, (nodes) => { return text; });
 
             Assert.Equal($"<h3>{text}</h3>", result);
         }
@@ -223,7 +224,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testH4Document()
         {
-            string result = defaultRender.RenderNode(NodeType.Heading_4, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("h4", node, (nodes) => { return text; });
 
             Assert.Equal($"<h4>{text}</h4>", result);
         }
@@ -231,7 +232,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testH5Document()
         {
-            string result = defaultRender.RenderNode(NodeType.Heading_5, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("h5", node, (nodes) => { return text; });
 
             Assert.Equal($"<h5>{text}</h5>", result);
         }
@@ -239,7 +240,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testH6Document()
         {
-            string result = defaultRender.RenderNode(NodeType.Heading_6, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("h6", node, (nodes) => { return text; });
 
             Assert.Equal($"<h6>{text}</h6>", result);
         }
@@ -247,7 +248,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testOrderListDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.OrderList, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("ol", node, (nodes) => { return text; });
 
             Assert.Equal($"<ol>{text}</ol>", result);
         }
@@ -255,7 +256,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testUnOrderListDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.UnOrderList, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("ul", node, (nodes) => { return text; });
 
             Assert.Equal($"<ul>{text}</ul>", result);
         }
@@ -263,7 +264,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testListItemDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.ListItem, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("li", node, (nodes) => { return text; });
 
             Assert.Equal($"<li>{text}</li>", result);
         }
@@ -271,7 +272,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testHRDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.Hr, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("hr", node, (nodes) => { return text; });
 
             Assert.Equal($"<hr>", result);
         }
@@ -279,7 +280,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.Table, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("table", node, (nodes) => { return text; });
 
             Assert.Equal($"<table>{text}</table>", result);
         }
@@ -287,7 +288,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableHeaderDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.TableHeader, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("thead", node, (nodes) => { return text; });
 
             Assert.Equal($"<thead>{text}</thead>", result);
         }
@@ -295,7 +296,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableFooterDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.TableFooter, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("tfoot", node, (nodes) => { return text; });
 
             Assert.Equal($"<tfoot>{text}</tfoot>", result);
         }
@@ -303,7 +304,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableBodyDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.TableBody, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("tbody", node, (nodes) => { return text; });
 
             Assert.Equal($"<tbody>{text}</tbody>", result);
         }
@@ -311,7 +312,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableRowDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.TableRow, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("tr", node, (nodes) => { return text; });
 
             Assert.Equal($"<tr>{text}</tr>", result);
         }
@@ -319,7 +320,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableHeadDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.TableHead, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("th", node, (nodes) => { return text; });
 
             Assert.Equal($"<th>{text}</th>", result);
         }
@@ -327,7 +328,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testTableDataDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.TableData, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("td", node, (nodes) => { return text; });
 
             Assert.Equal($"<td>{text}</td>", result);
         }
@@ -335,7 +336,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testBlockQuoteDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.BlockQuote, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("blockquote", node, (nodes) => { return text; });
 
             Assert.Equal($"<blockquote>{text}</blockquote>", result);
         }
@@ -343,7 +344,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testCodeDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.Code, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("code", node, (nodes) => { return text; });
 
             Assert.Equal($"<code>{text}</code>", result);
         }
@@ -351,7 +352,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void testDocument()
         {
-            string result = defaultRender.RenderNode(NodeType.Document, node, (nodes) => { return text; });
+            string result = defaultRender.RenderNode("doc", node, (nodes) => { return text; });
 
             Assert.Equal(text, result);
         }

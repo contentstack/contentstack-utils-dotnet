@@ -10,7 +10,7 @@ namespace Contentstack.Utils.Models
     [JsonConverter(typeof(NodeJsonConverter))]
     public class Node
     {
-        public NodeType type { get; set; }
+        public string type { get; set; }
 
         public IDictionary<string, object> attrs { get; set; }
 

@@ -11,6 +11,6 @@ namespace Contentstack.Utils.Interfaces
     {
         string RenderOption(IEmbeddedObject entry, Metadata metadata);
         string RenderMark(MarkType markType, string text);
-        string RenderNode(NodeType nodeType, Node node, NodeChildrenCallBack callBack);
+        string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack);
     }
 }
