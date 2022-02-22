@@ -1,0 +1,81 @@
+﻿{
+  "title": "entry and assets",
+  "url": "/entry-and-assets",
+  "rich_text_editor": "<figure class=\"embedded-entry block-entry\" data-sys-entry-uid=\"UID_09\" data-sys-entry-locale=\"en-us\" data-sys-content-type-uid=\"embeddedrte\" sys-style-type=\"block\" type=\"entry\"></figure>\n<p></p>\n<figure class=\"embedded-asset\" data-sys-asset-filelink=\"https://contentstack.image/v3/UID_11/html5.png\" data-sys-asset-uid=\"UID_11\" data-sys-asset-filename=\"svg-logo-text.png\" data-sys-asset-contenttype=\"image/png\" type=\"asset\" sys-style-type=\"display\"></figure>",
+  "locale": "en-us",
+  "_in_progress": false,
+  "uid": "UID_15",
+  "rte": "<figure class=\"embedded-entry block-entry\" data-sys-entry-uid=\"UID_07\" data-sys-entry-locale=\"en-us\" data-sys-content-type-uid=\"content_block\" sys-style-type=\"block\" type=\"entry\"></figure>\n<figure class=\"embedded-entry inline-entry\" data-sys-entry-uid=\"UID_08\" data-sys-entry-locale=\"en-us\" data-sys-content-type-uid=\"embeddedrte\" sys-style-type=\"inline\" type=\"entry\"></figure>\n<p></p>",
+  "_embedded_entries": {
+    "rte": [
+      {
+        "title": "Update this title",
+        "url": "",
+        "locale": "en-us",
+        "uid": "UID_07",
+        "_content_type_uid": "content_block",
+        "_version": 5,
+        "_in_progress": false,
+        "multi_line": "",
+        "_embedded_entries": [
+          {
+            "uid": "UID_07",
+            "_content_type_uid": "content_block"
+          }
+        ],
+        "rich_text_editor": "<figure class=\"embedded-entry inline-entry\" data-sys-entry-uid=\"UID_07\" data-sys-entry-locale=\"en-us\" data-sys-content-type-uid=\"content_block\" sys-style-type=\"inline\" type=\"entry\"></figure>"
+      },
+      {
+        "title": "updated title",
+        "rich_text_editor": "<figure class=\"embedded-asset\" data-sys-asset-filelink=\"https://contentstack.image/v3/UID_10/DIABETICDIET-800x600.jpg\" data-sys-asset-uid=\"UID_10\" data-sys-asset-filename=\"DIABETICDIET-800x600.jpg\" data-sys-asset-contenttype=\"image/jpeg\" type=\"asset\" sys-style-type=\"display\"></figure>",
+        "locale": "en-us",
+        "uid": "UID_09",
+        "_content_type_uid": "embeddedrte",
+
+        "_in_progress": false,
+        "_embedded_assets": [
+          {
+            "uid": "UID_10"
+          }
+        ]
+      },
+      {
+        "title": "Entry with embedded entry",
+        "rich_text_editor": "<figure class=\"embedded-entry block-entry\" data-sys-entry-uid=\"UID_16\" data-sys-content-type-uid=\"1234\" sys-style-type=\"block\" type=\"entry\"></figure>\n<figure class=\"embedded-entry inline-entry\" data-sys-entry-uid=\"UID_16\" data-sys-content-type-uid=\"1234\" sys-style-type=\"inline\" type=\"entry\"></figure>\n<p><br><br></p>\n<figure class=\"embedded-asset\" data-sys-asset-filelink=\"https://contentstack.image/v3/assets/UID_17html5.png\" data-sys-asset-uid=\"UID_19\" data-sys-asset-filename=\"html5.png\" data-sys-asset-contenttype=\"image/png\" type=\"asset\" sys-style-type=\"display\"></figure>",
+        "locale": "en-us",
+        "uid": "UID_08",
+        "_content_type_uid": "embeddedrte",
+        "_in_progress": false,
+        "_embedded_entries": [
+          {
+            "uid": "UID_16",
+            "_content_type_uid": "1234"
+          },
+          {
+            "uid": "UID_16",
+            "_content_type_uid": "1234"
+          }
+        ],
+        "_embedded_assets": [
+          {
+            "uid": "UID_19"
+          }
+        ]
+      }
+    ]
+  },
+  "_embedded_assets": {
+    "rte": [
+      {
+        "uid": "UID_11",
+        "content_type": "image/png",
+        "file_size": "36743",
+        "filename": "svg-logo-text.png",
+        "url": "/v3/assets/UID_11/svg-logo-text.png",
+        "title": "svg-logo-text.png",
+        "description": ""
+      }
+    ]
+  }
+}
+  
