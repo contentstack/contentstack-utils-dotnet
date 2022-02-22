@@ -1,0 +1,3 @@
+fileignoreconfig:
+  - filename: Contentstack.Utils/Utils.cs
+    checksum: c3ef91c330d0a73721931e44d56193036a7483ecfa5d6b00dc88a0b1e67c58c3

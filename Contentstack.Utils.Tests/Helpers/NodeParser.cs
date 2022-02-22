@@ -27,5 +27,14 @@ namespace Contentstack.Utils.Tests.Helpers
         }
     }
 
+    public class AssetParser
+    {
+        public static AssetMetaModel parse(string jsonNode)
+        {
+            JsonSerializerSettings SerializerSettings = new JsonSerializerSettings();
+            JsonSerializer Serializer = JsonSerializer.Create(SerializerSettings);
+            return JsonConvert.DeserializeObject<AssetMetaModel>(jsonNode, SerializerSettings);
+        }
+    }
 }
 
