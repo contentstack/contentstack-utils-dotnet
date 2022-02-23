@@ -343,29 +343,26 @@ namespace Contentstack.Utils
         private static Preset getPreset(AssetMetadata assetMetadata, string extenionUid, string presetName = null, string presetUid = null)
         {
             Preset preset = null;
-            if (assetMetadata.extensions != null)
+            if (assetMetadata.Extensions != null)
             {
-                AssetExtension assetExtension = assetMetadata.extensions.Find(extention =>
+                AssetExtension assetExtension = assetMetadata.Extensions.Find(extention =>
                 {
                     return extention.Uid == extenionUid;
                 });
                 if (assetExtension != null)
                 {
-                    if (assetExtension.LocalMetadata != null && assetExtension.LocalMetadata.Presets != null)
+                    foreach (ExtensionMetadata extensionMetadata in assetExtension.ExtensionMetadata)
                     {
-                        preset = assetExtension.LocalMetadata.Presets.Find(item =>
+                        preset = extensionMetadata.Presets.Find(item =>
                         {
                             return item.Uid == presetUid || item.Name == presetName;
                         });
-                    }
-
-                    if (preset == null && assetExtension.GlobalMetadata != null && assetExtension.GlobalMetadata.Presets != null)
-                    {
-                        preset = assetExtension.GlobalMetadata.Presets.Find(item =>
+                        if (preset != null)
                         {
-                            return item.Uid == presetUid || item.Name == presetName;
-                        });
+                            break;
+                        }
                     }
+                    
                 }
             }
            

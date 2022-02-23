@@ -8,16 +8,14 @@ namespace Contentstack.Utils.Models
     [JsonConverter(typeof(AssetMetadataConverter))]
     public class AssetMetadata
     {
-        public List<AssetExtension> extensions;
+        public List<AssetExtension> Extensions;
     }
 
     public class AssetExtension
     {
         public string Uid { get; set; }
-        [JsonProperty(PropertyName = "local_metadata")]
-        public ExtensionMetadata LocalMetadata;
-        [JsonProperty(PropertyName = "global_metadata")]
-        public ExtensionMetadata GlobalMetadata;
+        public List<ExtensionMetadata> ExtensionMetadata;
+       
     }
 
     [JsonConverter(typeof(ExtensionMetadataConverter))]

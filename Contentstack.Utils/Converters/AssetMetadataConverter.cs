@@ -11,7 +11,7 @@ namespace Contentstack.Utils.Converters
         public override AssetMetadata ReadJson(JsonReader reader, Type objectType, AssetMetadata existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             AssetMetadata metadata = new AssetMetadata();
-            metadata.extensions = new List<AssetExtension>();
+            metadata.Extensions = new List<AssetExtension>();
             JObject jObject = JObject.Load(reader);
             if (jObject.GetValue("extensions") != null && jObject.GetValue("extensions").GetType() == typeof(JObject))
             {
@@ -19,8 +19,9 @@ namespace Contentstack.Utils.Converters
                 {
                     AssetExtension extension = new AssetExtension();
                     extension.Uid = jProperty.Name;
-                    serializer.Populate(jProperty.Value.CreateReader(), extension);
-                    metadata.extensions.Add(extension);
+                    extension.ExtensionMetadata = new List<ExtensionMetadata>();
+                    serializer.Populate(jProperty.Value.CreateReader(), extension.ExtensionMetadata);
+                    metadata.Extensions.Add(extension);
                 }
             }
             

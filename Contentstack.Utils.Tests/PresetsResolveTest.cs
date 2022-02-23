@@ -17,14 +17,6 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
-        public void testRenderBlankMetadata()
-        {
-            AssetMetaModel asset = AssetParser.parse(JsonToHtmlConstants.kAssetMetadataBlank);
-            string resultUrl = Utils.ResolvePreset(asset.Url, asset.assetMetadata, "extension_uid", "Global Preset");
-            Assert.Equal(asset.Url, resultUrl);
-        }
-
-        [Fact]
         public void testRenderBlankExtension()
         {
             AssetMetaModel asset = AssetParser.parse(JsonToHtmlConstants.kAssetBlankExtension);
