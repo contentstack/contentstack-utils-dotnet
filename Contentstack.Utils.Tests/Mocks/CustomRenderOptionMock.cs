@@ -10,6 +10,21 @@ namespace Contentstack.Utils.Tests.Mocks
         public CustomRenderOptionMock(IEntryEmbedable entry) : base(entry)
         {
         }
+
+        public override string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
+        {
+            switch (nodeType)
+            {
+                case "a":
+                    if (node.attrs.ContainsKey("target"))
+                    {
+                        return $"<a href=\"{(string)node.attrs["url"]}\" target=\"{(string)node.attrs["target"]}\">{callBack(node.children)}</a>";
+                    }
+                    return $"<a href=\"{(string)node.attrs["url"]}\">{callBack(node.children)}</a>";
+            }
+            return base.RenderNode(nodeType, node, callBack);
+        }
+
         public override string RenderOption(IEmbeddedObject embeddedObject, Metadata metadata)
         {
             var attributeStringList = new List<string>();
