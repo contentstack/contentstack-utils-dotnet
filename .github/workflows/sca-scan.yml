@@ -14,6 +14,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ./Contentstack.Utils.sln
       - name: Run Snyk to check for vulnerabilities
-        run: snyk test --fail-on=all
+        run: cd Contentstack.Utils && snyk test --fail-on=all
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
