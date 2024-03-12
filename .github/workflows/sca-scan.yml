@@ -8,13 +8,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@master
+      - uses: snyk/actions/setup@master
       - name: Setup .NET
         uses: actions/setup-dotnet@v3.0.3
       - name: Restore dependencies
         run: dotnet restore ./Contentstack.Utils.sln
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/dotnet@master
+        run: snyk test --fail-on=all
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --fail-on=all
