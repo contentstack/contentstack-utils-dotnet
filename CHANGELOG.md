@@ -1,4 +1,8 @@
 
+### Version: 1.0.2
+#### Date: Mar-14-2024
+- Style attributes supported in converted HTML.
+
 ### Version: 1.0.1 
 #### Date: July-16-2021
 - Json RTE content to Html Support added.
