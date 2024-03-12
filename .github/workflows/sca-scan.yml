@@ -13,4 +13,4 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --fail-on=all
+          args: --file=Contentstack.Utils/obj/project.assets.json --fail-on=all
