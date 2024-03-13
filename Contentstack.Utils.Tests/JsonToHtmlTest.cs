@@ -171,6 +171,26 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
+        public void Should_Return_Result_For_Link_MailTo_Document()
+        {
+            Node node = NodeParser.parse(JsonToHtmlConstants.kLinkInPMailToJson);
+
+            string result = Utils.JsonToHtml(node, defaultRender);
+
+            Assert.Equal(JsonToHtmlResultConstants.kLinkInPMailToHtml, result);
+        }
+
+        [Fact]
+        public void Should_Return_Result_For_Link_MailTo_Document_Custom()
+        {
+            Node node = NodeParser.parse(JsonToHtmlConstants.kLinkInPMailToJson);
+
+            string result = Utils.JsonToHtml(node, new CustomRenderOptionMock(null));
+
+            Assert.Equal(JsonToHtmlResultConstants.kLinkInPMailToTARGEtHtml, result);
+        }
+
+        [Fact]
         public void Should_Return_Result_For_Array_Link_Document()
         {
             Node node = NodeParser.parse(JsonToHtmlConstants.kLinkInPJson);

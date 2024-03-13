@@ -198,6 +198,14 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
+        public void testFragmentDocument()
+        {
+            string result = defaultRender.RenderNode("fragment", node, (nodes) => { return text; });
+
+            Assert.Equal($"<fragment>{text}</fragment>", result);
+        }
+
+        [Fact]
         public void testH1Document()
         {
             string result = defaultRender.RenderNode("h1", node, (nodes) => { return text; });
