@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Contentstack.Utils.Enums;
 using Contentstack.Utils.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace Contentstack.Utils.Models
 {
@@ -101,9 +102,10 @@ namespace Contentstack.Utils.Models
                     {
                         styleAttrs = $" style=\"{styleVal}\"";
                     }
-                    else if (styleVal is IDictionary<string, string>)
+                    else if (styleVal is JObject)
                     {
-                        var styleDictionary = (IDictionary<string, string>)styleVal;
+                        var styleObject = (JObject)styleVal;
+                        var styleDictionary = styleObject.ToObject<Dictionary<string, string>>();
                         styleAttrs = " style=\"";
                         foreach (var pair in styleDictionary)
                         {
