@@ -193,5 +193,80 @@ namespace Contentstack.Utils
             }
             return null;
         }
+
+        public static void addEditableTags(IEmbeddedEntry entry, string contentTypeUid, bool tagsAsObject, string locale = "en-us")
+        {
+            if (entry != null)
+                entry.$ = GetTag(entry, $"{contentTypeUid}.{entry.Uid}.{locale}", tagsAsObject, locale);
+        }
+
+        private static Dictionary<string, object> GetTag(object content, string prefix, bool tagsAsObject, string locale)
+        {
+            var tags = new Dictionary<string, object>();
+            foreach (var property in content.GetType().GetProperties())
+            {
+                var key = property.Name;
+                var value = property.GetValue(content);
+
+                if (key == "$")
+                    continue;
+
+                switch (value)
+                {
+                    case object[] arrayValue:
+                        for (int i = 0; i < arrayValue.Length; i++)
+                        {
+                            var childKey = $"{key}__{i}";
+                            var parentKey = $"{key}__parent";
+                            tags[childKey] = GetTagsValue($"{prefix}.{key}.{i}", tagsAsObject);
+                            tags[parentKey] = GetParentTagsValue($"{prefix}.{key}", tagsAsObject);
+
+                            if (arrayValue[i] is IEmbeddedEntry entryModel)
+                            {
+                                entryModel.addEditableTags(entryModel._content_type_uid, tagsAsObject, locale);
+                            }
+                            else if (arrayValue[i] is Dictionary<string, object> dictValue)
+                            {
+                                tags[key] = GetTag(dictValue, $"{prefix}.{key}.{i}", tagsAsObject, locale);
+                            }
+                        }
+                        break;
+                    case Dictionary<string, object> dictValue:
+                        if (dictValue != null)
+                        {
+                            tags[key] = GetTag(dictValue, $"{prefix}.{key}", tagsAsObject, locale);
+                        }
+                        break;
+                    default:
+                        tags[key] = GetTagsValue($"{prefix}.{key}", tagsAsObject);
+                        break;
+                }
+            }
+            return tags;
+        }
+
+        private static object GetTagsValue(string dataValue, bool tagsAsObject)
+        {
+            if (tagsAsObject)
+            {
+                return new Dictionary<string, object> { { "data-cslp", dataValue } };
+            }
+            else
+            {
+                return $"data-cslp={dataValue}";
+            }
+        }
+
+        private static object GetParentTagsValue(string dataValue, bool tagsAsObject)
+        {
+            if (tagsAsObject)
+            {
+                return new Dictionary<string, object> { { "data-cslp-parent-field", dataValue } };
+            }
+            else
+            {
+                return $"data-cslp-parent-field={dataValue}";
+            }
+        }
     }
 }
