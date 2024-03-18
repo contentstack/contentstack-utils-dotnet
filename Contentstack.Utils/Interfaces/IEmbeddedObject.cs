@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace Contentstack.Utils.Interfaces
 {
     public interface IEmbeddedObject
@@ -18,6 +20,12 @@ namespace Contentstack.Utils.Interfaces
     public interface IEmbeddedEntry: IEmbeddedObject
     {
         string Title
+        {
+            get;
+            set;
+        }
+
+        Dictionary<string, object> Properties
         {
             get;
             set;

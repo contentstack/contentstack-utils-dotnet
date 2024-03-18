@@ -1,4 +1,6 @@
 fileignoreconfig:
 - filename: Contentstack.Utils/Models/Options.cs
   checksum: 3dc51f0de02429ef9a43b66e666ac4dbde41195e245f8ecc0094548ca8603245
+- filename: Contentstack.Utils/Utils.cs
+  checksum: 9da2e99ce291b8812c74f70e9d9c9d742075a08c580022c542de5fe12f9532f6
 version: ""
