@@ -19,10 +19,10 @@ jobs:
       - name: Build solution and generate NuGet package
         run: |
           dotnet pack -c Release -o out
-          echo ls
+          ls
 
       - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./contentstack-utils-dotnet/out/*.nupkg --api-key $NUGET_AUTH_TOKEN --source https://www.nuget.org/ --skip-duplicate --no-symbols true
+        run: dotnet nuget push ./contentstack-utils-dotnet/out/*.nupkg --api-key $NUGET_AUTH_TOKEN --source "https://www.nuget.org/" --skip-duplicate --no-symbols true
 
   publish-git:  
     runs-on: windows-latest
