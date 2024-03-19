@@ -19,10 +19,11 @@ jobs:
       - name: Build solution and generate NuGet package
         run: |
           dotnet pack -c Release -o out
-          ls
 
       - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./out/*.nupkg --api-key $NUGET_AUTH_TOKEN --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json
+        run: |
+          cd out
+          dotnet nuget push "contentstack.utils.*.nupkg" --api-key $NUGET_AUTH_TOKEN --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json
 
   publish-git:  
     runs-on: windows-latest
@@ -41,4 +42,6 @@ jobs:
           dotnet pack -c Release -o out
 
       - name: Push generated package to GitHub registry
-        run: dotnet nuget push ./out/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols true
+        run: |
+          cd out
+          dotnet nuget push "contentstack.utils.*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols true
