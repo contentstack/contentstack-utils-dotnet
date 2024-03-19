@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Contentstack.Utils.Enums;
 using Contentstack.Utils.Interfaces;
+using Newtonsoft.Json.Linq;
 
 namespace Contentstack.Utils.Models
 {
@@ -89,66 +91,92 @@ namespace Contentstack.Utils.Models
         public virtual string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
         {
             string href = "";
+            string styleAttrs = "";
+
+            if (node.attrs.ContainsKey("style"))
+            {
+                var styleVal = node.attrs["style"];
+                if (styleVal != null)
+                {
+                    if (styleVal is string)
+                    {
+                        styleAttrs = $" style=\"{styleVal}\"";
+                    }
+                    else if (styleVal is JObject)
+                    {
+                        var styleObject = (JObject)styleVal;
+                        var styleDictionary = styleObject.ToObject<Dictionary<string, string>>();
+                        styleAttrs = " style=\"";
+                        foreach (var pair in styleDictionary)
+                        {
+                            styleAttrs += $"{pair.Key}:{pair.Value};";
+                        }
+                        styleAttrs += "\"";
+                    }
+                }
+            }
             switch (nodeType)
             {
                 case "p":
-                    return $"<p>{callBack(node.children)}</p>";
+                    return $"<p{styleAttrs}>{callBack(node.children)}</p>";
                 case "a":
                     if (node.attrs.ContainsKey("url"))
                     {
                         href = (string)node.attrs["url"];
                     }
-                    return $"<a href=\"{href}\">{callBack(node.children)}</a>";
+                    return $"<a href=\"{href}\"{styleAttrs}>{callBack(node.children)}</a>";
                 case "img":
                     if (node.attrs.ContainsKey("url"))
                     {
                         href = (string)node.attrs["url"];
                     }
-                    return $"<img src=\"{href}\" />{callBack(node.children)}";
+                    return $"<img{styleAttrs} src=\"{href}\" />{callBack(node.children)}";
                 case "embed":
                     if (node.attrs.ContainsKey("url"))
                     {
                         href = (string)node.attrs["url"];
                     }
-                    return $"<iframe src=\"{href}\">{callBack(node.children)}</iframe>";
+                    return $"<iframe{styleAttrs} src=\"{href}\">{callBack(node.children)}</iframe>";
+                case "fragment":
+                    return $"<fragment{styleAttrs}>{callBack(node.children)}</fragment>";
                 case "h1":
-                    return $"<h1>{callBack(node.children)}</h1>";
+                    return $"<h1{styleAttrs}>{callBack(node.children)}</h1>";
                 case "h2":
-                    return $"<h2>{callBack(node.children)}</h2>";
+                    return $"<h2{styleAttrs}>{callBack(node.children)}</h2>";
                 case "h3":
-                    return $"<h3>{callBack(node.children)}</h3>";
+                    return $"<h3{styleAttrs}>{callBack(node.children)}</h3>";
                 case "h4":
-                    return $"<h4>{callBack(node.children)}</h4>";
+                    return $"<h4{styleAttrs}>{callBack(node.children)}</h4>";
                 case "h5":
-                    return $"<h5>{callBack(node.children)}</h5>";
+                    return $"<h5{styleAttrs}>{callBack(node.children)}</h5>";
                 case "h6":
-                    return $"<h6>{callBack(node.children)}</h6>";
+                    return $"<h6{styleAttrs}>{callBack(node.children)}</h6>";
                 case "ol":
-                    return $"<ol>{callBack(node.children)}</ol>";
+                    return $"<ol{styleAttrs}>{callBack(node.children)}</ol>";
                 case "ul":
-                    return $"<ul>{callBack(node.children)}</ul>";
+                    return $"<ul{styleAttrs}>{callBack(node.children)}</ul>";
                 case "li":
-                    return $"<li>{callBack(node.children)}</li>";
+                    return $"<li{styleAttrs}>{callBack(node.children)}</li>";
                 case "hr":
                     return $"<hr>";
                 case "table":
-                    return $"<table>{callBack(node.children)}</table>";
+                    return $"<table{styleAttrs}>{callBack(node.children)}</table>";
                 case "thead":
-                    return $"<thead>{callBack(node.children)}</thead>";
+                    return $"<thead{styleAttrs}>{callBack(node.children)}</thead>";
                 case "tbody":
-                    return $"<tbody>{callBack(node.children)}</tbody>";
+                    return $"<tbody{styleAttrs}>{callBack(node.children)}</tbody>";
                 case "tfoot":
-                    return $"<tfoot>{callBack(node.children)}</tfoot>";
+                    return $"<tfoot{styleAttrs}>{callBack(node.children)}</tfoot>";
                 case "tr":
-                    return $"<tr>{callBack(node.children)}</tr>";
+                    return $"<tr{styleAttrs}>{callBack(node.children)}</tr>";
                 case "th":
-                    return $"<th>{callBack(node.children)}</th>";
+                    return $"<th{styleAttrs}>{callBack(node.children)}</th>";
                 case "td":
-                    return $"<td>{callBack(node.children)}</td>";
+                    return $"<td{styleAttrs}>{callBack(node.children)}</td>";
                 case "blockquote":
                     return $"<blockquote>{callBack(node.children)}</blockquote>";
                 case "code":
-                    return $"<code>{callBack(node.children)}</code>";
+                    return $"<code{styleAttrs}>{callBack(node.children)}</code>";
                 default:
                     return callBack(node.children);
             }
