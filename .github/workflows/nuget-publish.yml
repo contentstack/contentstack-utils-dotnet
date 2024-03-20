@@ -41,4 +41,4 @@ jobs:
       - name: Push generated package to GitHub registry
         run: |
           cd out
-          dotnet nuget push "contentstack.utils.*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate --no-symbols true
+          dotnet nuget push "contentstack.utils.*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate --no-symbols true --source https://api.nuget.org/v3/index.json
