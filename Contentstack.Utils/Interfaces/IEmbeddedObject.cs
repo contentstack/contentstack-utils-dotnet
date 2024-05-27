@@ -24,6 +24,14 @@ namespace Contentstack.Utils.Interfaces
         }
     }
 
+    public interface EditableEntry: IEmbeddedEntry
+    {
+
+        string Locale { get; set; }
+
+        object this[string key] { get; set; }
+    }
+
     public interface IEmbeddedAsset: IEmbeddedObject
     {
         string Title
