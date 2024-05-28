@@ -193,5 +193,94 @@ namespace Contentstack.Utils
             }
             return null;
         }
+
+        public static void addEditableTags(EditableEntry entry, string contentTypeUid, bool tagsAsObject, string locale = "en-us")
+        {
+            if (entry != null)
+                entry["$"] = GetTag(entry, $"{contentTypeUid}.{entry.Uid}.{locale}", tagsAsObject, locale);
+        }
+
+        private static Dictionary<string, object> GetTag(object content, string prefix, bool tagsAsObject, string locale)
+        {
+            var tags = new Dictionary<string, object>();
+            foreach (var property in (Dictionary<string, object>)content)
+            {
+                var key = property.Key;
+                var value = property.Value;
+
+                if (key == "$")
+                    continue;
+                    
+                switch (value)
+                {
+                    case object obj when obj is object[] array:
+                        for (int index = 0; index < array.Length; index++)
+                        {
+                            object objValue = array[index]; 
+                            string childKey = $"{key}__{index}";
+                            string parentKey = $"{key}__parent";
+
+                            tags[childKey] = GetTagsValue($"{prefix}.{key}.{index}", tagsAsObject);
+                            tags[parentKey] = GetParentTagsValue($"{prefix}.{key}", tagsAsObject);
+
+                            if (objValue != null &&
+                                objValue.GetType().GetProperty("_content_type_uid") != null &&
+                                objValue.GetType().GetProperty("Uid") != null)
+                            {
+                                var typedObj = (EditableEntry)objValue;
+                                string locale_ = Convert.ToString(typedObj.GetType().GetProperty("locale").GetValue(typedObj));
+                                string ctUid = Convert.ToString(typedObj.GetType().GetProperty("_content_type_uid").GetValue(typedObj));
+                                string uid = Convert.ToString(typedObj.GetType().GetProperty("uid").GetValue(typedObj));
+                                string localeStr = "";
+                                if (locale_ != null)
+                                {
+                                    localeStr = locale_;
+                                } else
+                                {
+                                    localeStr = locale;
+                                }
+                                typedObj["$"] = GetTag(typedObj, $"{ctUid}.{uid}.{localeStr}", tagsAsObject, locale);
+                            }
+                            else if (value is object)
+                            {
+                                ((EditableEntry)value)["$"] = GetTag(value, $"{prefix}.{key}.{index}", tagsAsObject, locale);
+                            }
+                        }
+                        tags[key] = GetTagsValue($"{prefix}.{key}", tagsAsObject);
+                        break;
+                    case object obj when obj != null:
+                        if (value != null)
+                        {
+                            ((EditableEntry)value)["$"] = GetTag(value, $"{prefix}.{key}", tagsAsObject, locale);
+                        }
+                        break;
+                }
+            }
+            return tags;
+        }
+
+        private static object GetTagsValue(string dataValue, bool tagsAsObject)
+        {
+            if (tagsAsObject)
+            {
+                return new Dictionary<string, object> { { "data-cslp", dataValue } };
+            }
+            else
+            {
+                return $"data-cslp={dataValue}";
+            }
+        }
+
+        private static object GetParentTagsValue(string dataValue, bool tagsAsObject)
+        {
+            if (tagsAsObject)
+            {
+                return new Dictionary<string, object> { { "data-cslp-parent-field", dataValue } };
+            }
+            else
+            {
+                return $"data-cslp-parent-field={dataValue}";
+            }
+        }
     }
 }
