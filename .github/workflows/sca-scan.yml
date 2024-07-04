@@ -3,17 +3,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
-  security:
+  security-sca:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@master
-      - uses: snyk/actions/setup@master
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3.0.3
-      - name: Restore dependencies
-        run: dotnet restore ./Contentstack.Utils.sln
+      - uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities
-        run: cd Contentstack.Utils && snyk test --fail-on=all
+        uses: snyk/actions/dotnet@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --fail-on=all
