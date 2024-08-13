@@ -10,6 +10,8 @@ namespace Contentstack.Utils.Models
         public bool inlineCode { get; set; }
         public bool subscript { get; set; }
         public bool superscript { get; set; }
+        public string classname { get; set; }
+        public string id { get; set; }
         public string text { get; set; }
     }
 }
