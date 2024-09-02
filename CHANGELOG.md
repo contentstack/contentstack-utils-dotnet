@@ -1,4 +1,8 @@
 
+### Version: 1.0.4
+#### Date: Aug-21-2024
+- Classname and ID property support in text node
+
 ### Version: 1.0.3
 #### Date: Jul-10-2024
 - Editable tags added
