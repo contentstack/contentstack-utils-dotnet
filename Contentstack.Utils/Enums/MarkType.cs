@@ -31,12 +31,12 @@ namespace Contentstack.Utils.Enums
         /// This will specify the Mark type of text node as Superscript
         /// </summary>
         Superscript,
-         /// <summary>
-         /// This will specify the Mark type of text node as Superscript
-         /// </summary>
+        /// <summary>
+        /// This will specify the class selector
+        /// </summary>
         Class,
-         /// <summary>
-        /// This will specify the Mark type of text node as Superscript
+        /// <summary>
+        /// This will specify the id selector
         /// </summary>
         Id
 }
