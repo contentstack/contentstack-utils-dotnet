@@ -66,7 +66,7 @@ namespace Contentstack.Utils.Models
             return "";
         }
 
-        public virtual string RenderMark(MarkType markType, string text)
+        public virtual string RenderMark(MarkType markType, string text, string className = "", string id = "")
         {
             switch (markType)
             {
@@ -84,6 +84,11 @@ namespace Contentstack.Utils.Models
                     return $"<sub>{text}</sub>";
                 case MarkType.Superscript:
                     return $"<sup>{text}</sup>";
+                case MarkType.Id:
+                case MarkType.Class:
+                    string classAttr = !string.IsNullOrEmpty(className) ? $" class=\"{className}\"" : "";
+                    string idAttr = !string.IsNullOrEmpty(id) ? $" id=\"{id}\"" : "";
+                    return $"<span{classAttr}{idAttr}>{text}</span>";
             }
             return text;
         }

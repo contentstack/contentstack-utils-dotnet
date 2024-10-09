@@ -10,7 +10,7 @@ namespace Contentstack.Utils.Interfaces
     public interface IRenderable
     {
         string RenderOption(IEmbeddedObject entry, Metadata metadata);
-        string RenderMark(MarkType markType, string text);
+        string RenderMark(MarkType markType, string text, string className, string Id);
         string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack);
     }
 }

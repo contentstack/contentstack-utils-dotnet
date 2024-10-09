@@ -1,4 +1,8 @@
 
+### Version: 1.0.5
+#### Date: Oct-10-2024
+- Used Class Name and Id property in JsonToHTML converter
+
 ### Version: 1.0.4
 #### Date: Aug-21-2024
 - Classname and ID property support in text node
