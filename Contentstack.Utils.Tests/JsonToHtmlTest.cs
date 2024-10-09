@@ -479,5 +479,15 @@ namespace Contentstack.Utils.Tests
 
             Assert.Equal(new List<string>() { "<hr>" }, result);
         }
+
+        [Fact]
+        public void TestForClassandId()
+        {
+            Node node = NodeParser.parse(JsonToHtmlConstants.stringClassId);
+
+            var result = Utils.JsonToHtml(new List<Node>() { node }, defaultRender);
+
+            Assert.Equal(new List<string>() { JsonToHtmlResultConstants.stringClassIdResult }, result);
+        }
     }
 }

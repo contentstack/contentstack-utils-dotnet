@@ -30,6 +30,14 @@ namespace Contentstack.Utils.Enums
         /// <summary>
         /// This will specify the Mark type of text node as Superscript
         /// </summary>
-        Superscript
-    }
+        Superscript,
+         /// <summary>
+         /// This will specify the Mark type of text node as Superscript
+         /// </summary>
+        Class,
+         /// <summary>
+        /// This will specify the Mark type of text node as Superscript
+        /// </summary>
+        Id
+}
 }

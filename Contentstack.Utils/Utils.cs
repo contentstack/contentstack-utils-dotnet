@@ -159,6 +159,10 @@ namespace Contentstack.Utils
             {
                 text = options.RenderMark(MarkType.Bold, text: text);
             }
+            if (!string.IsNullOrEmpty(textNode.classname) || !string.IsNullOrEmpty(textNode.id))
+            {
+                text = options.RenderMark(MarkType.Class, text: text, textNode.classname, textNode.id);
+            }
             return text;
         }
 
