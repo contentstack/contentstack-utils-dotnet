@@ -1,3 +1,6 @@
+### Version: 1.0.6
+#### Date: June-09-2025
+- Used 'title' and 'target' in a tags
 
 ### Version: 1.0.5
 #### Date: Oct-10-2024

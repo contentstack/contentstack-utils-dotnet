@@ -489,5 +489,13 @@ namespace Contentstack.Utils.Tests
 
             Assert.Equal(new List<string>() { JsonToHtmlResultConstants.stringClassIdResult }, result);
         }
+
+        [Fact]
+        public void Should_Render_All_Marks_And_Target_Attribute()
+        {
+            Node node = NodeParser.parse(JsonToHtmlConstants.kJSONRTE);
+            var result = Utils.JsonToHtml(node, defaultRender);
+            Assert.Equal(JsonToHtmlResultConstants.kJSONRTEResult, result);
+        }
     }
 }
