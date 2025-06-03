@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using Contentstack.Utils.Enums;
 using Contentstack.Utils.Interfaces;
 using Newtonsoft.Json.Linq;
@@ -97,7 +98,6 @@ namespace Contentstack.Utils.Models
         {
             string href = "";
             string styleAttrs = "";
-
             if (node.attrs.ContainsKey("style"))
             {
                 var styleVal = node.attrs["style"];
@@ -107,10 +107,9 @@ namespace Contentstack.Utils.Models
                     {
                         styleAttrs = $" style=\"{styleVal}\"";
                     }
-                    else if (styleVal is JObject)
+                    else if (styleVal is JsonElement styleElement && styleElement.ValueKind == JsonValueKind.Object)
                     {
-                        var styleObject = (JObject)styleVal;
-                        var styleDictionary = styleObject.ToObject<Dictionary<string, string>>();
+                        var styleDictionary = JsonSerializer.Deserialize<Dictionary<string, string>>(styleElement.GetRawText());
                         styleAttrs = " style=\"";
                         foreach (var pair in styleDictionary)
                         {
@@ -120,27 +119,26 @@ namespace Contentstack.Utils.Models
                     }
                 }
             }
+            string GetAttrString(string key)
+            {
+                if (!node.attrs.ContainsKey(key) || node.attrs[key] == null) return "";
+                var val = node.attrs[key];
+                if (val is string s) return s;
+                if (val is JsonElement je && je.ValueKind == JsonValueKind.String) return je.GetString();
+                return val.ToString();
+            }
             switch (nodeType)
             {
                 case "p":
                     return $"<p{styleAttrs}>{callBack(node.children)}</p>";
                 case "a":
-                    if (node.attrs.ContainsKey("url"))
-                    {
-                        href = (string)node.attrs["url"];
-                    }
+                    href = GetAttrString("url");
                     return $"<a href=\"{href}\"{styleAttrs}>{callBack(node.children)}</a>";
                 case "img":
-                    if (node.attrs.ContainsKey("url"))
-                    {
-                        href = (string)node.attrs["url"];
-                    }
+                    href = GetAttrString("url");
                     return $"<img{styleAttrs} src=\"{href}\" />{callBack(node.children)}";
                 case "embed":
-                    if (node.attrs.ContainsKey("url"))
-                    {
-                        href = (string)node.attrs["url"];
-                    }
+                    href = GetAttrString("url");
                     return $"<iframe{styleAttrs} src=\"{href}\">{callBack(node.children)}</iframe>";
                 case "fragment":
                     return $"<fragment{styleAttrs}>{callBack(node.children)}</fragment>";
