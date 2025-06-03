@@ -1,8 +1,9 @@
-﻿using Contentstack.Utils.Interfaces;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Contentstack.Utils.Interfaces;
 using Contentstack.Utils.Models;
 using Contentstack.Utils.Tests.Constants;
 using Contentstack.Utils.Tests.Mocks;
-using Newtonsoft.Json;
 
 namespace Contentstack.Utils.Tests.Helpers
 {
@@ -10,10 +11,13 @@ namespace Contentstack.Utils.Tests.Helpers
     {
         public static Node parse(string jsonNode)
         {
-            JsonSerializerSettings SerializerSettings = new JsonSerializerSettings();
-            JsonSerializer Serializer = JsonSerializer.Create(SerializerSettings);
-
-            return JsonConvert.DeserializeObject<Node>(jsonNode, SerializerSettings);
+            // Remove trailing commas before closing brackets/braces
+            string cleanedJson = System.Text.RegularExpressions.Regex.Replace(
+                jsonNode,
+                @",(\s*[}\]])",
+                "$1"
+            );
+            return JsonSerializer.Deserialize<Node>(cleanedJson);
         }
     }
     public class GQLParser
@@ -21,9 +25,13 @@ namespace Contentstack.Utils.Tests.Helpers
         public static GQLModel<T> parse<T>(string jsonNode, string embedConnection = null) where T: IEmbeddedObject
         {
             var data = JsonToHtmlConstants.KGQLModel(jsonNode, embedConnection);
-            JsonSerializerSettings SerializerSettings = new JsonSerializerSettings();
-            JsonSerializer Serializer = JsonSerializer.Create(SerializerSettings);
-            return JsonConvert.DeserializeObject<GQLModel<T>>(data, SerializerSettings);
+            // Remove trailing commas before closing brackets/braces
+            string cleanedJson = System.Text.RegularExpressions.Regex.Replace(
+                data,
+                @",(\s*[}\]])",
+                "$1"
+            );
+            return JsonSerializer.Deserialize<GQLModel<T>>(cleanedJson);
         }
     }
 

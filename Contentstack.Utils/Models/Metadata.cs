@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Contentstack.Utils.Enums;
 using HtmlAgilityPack;
+using System.Text.Json;
 
 [assembly: InternalsVisibleTo("Contentstack.Utils.Tests")]
 namespace Contentstack.Utils.Models
@@ -58,7 +59,7 @@ namespace Contentstack.Utils.Models
             }
 
             return new Metadata() {
-                Text = node.InnerText ?? "",
+                Text = node.InnerText ?? string.Empty,
                 OuterHTML = node.OuterHtml ?? "",
                 StyleType = styleType,
                 ItemType = embedItemType,
@@ -71,30 +72,36 @@ namespace Contentstack.Utils.Models
         public static implicit operator Metadata(Node node) 
         {
             StyleType styleType;
-            if (!node.attrs.ContainsKey("display-type") || !(Enum.TryParse((string)node.attrs["display-type"], true, out styleType)))
+            string GetAttrString(string key)
+            {
+                if (!node.attrs.ContainsKey(key) || node.attrs[key] == null) return "";
+                var val = node.attrs[key];
+                if (val is string s) return s;
+                if (val is JsonElement je && je.ValueKind == JsonValueKind.String) return je.GetString();
+                return val.ToString();
+            }
+            if (!node.attrs.ContainsKey("display-type") || !(Enum.TryParse(GetAttrString("display-type"), true, out styleType)))
             {
                 styleType = StyleType.Block;
             }
-
             EmbedItemType embedItemType;
-            if (!node.attrs.ContainsKey("type") || !(Enum.TryParse((string)node.attrs["type"], true, out embedItemType)))
+            if (!node.attrs.ContainsKey("type") || !(Enum.TryParse(GetAttrString("type"), true, out embedItemType)))
             {
                 embedItemType = EmbedItemType.Entry;
             }
             string text = "";
             if (node.children != null && node.children.Count > 0 && node.children[0].GetType() == typeof(TextNode))
             {
-                text = ((TextNode)node.children[0]).text;
+                text = ((TextNode)node.children[0]).text ?? string.Empty;
             }
             string itemUID = "";
             if (node.attrs.ContainsKey("entry-uid"))
             {
-                itemUID = (string)node.attrs["entry-uid"];
+                itemUID = GetAttrString("entry-uid");
             }else if (node.attrs.ContainsKey("asset-uid"))
             {
-                itemUID = (string)node.attrs["asset-uid"];
+                itemUID = GetAttrString("asset-uid");
             }
-
             return new Metadata()
             {
                 Text = text,
@@ -102,7 +109,7 @@ namespace Contentstack.Utils.Models
                 StyleType = styleType,
                 ItemType = embedItemType,
                 ItemUid = itemUID,
-                ContentTypeUid = node.attrs.ContainsKey("content-type-uid") ? (string)node.attrs["content-type-uid"] : "",
+                ContentTypeUid = node.attrs.ContainsKey("content-type-uid") ? GetAttrString("content-type-uid") : "",
                 attributes = node.attrs
             };
 

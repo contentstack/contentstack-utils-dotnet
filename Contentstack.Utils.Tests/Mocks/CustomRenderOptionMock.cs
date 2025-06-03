@@ -12,14 +12,22 @@ namespace Contentstack.Utils.Tests.Mocks
         }
          public override string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
         {
+            string GetAttrString(string key)
+            {
+                if (!node.attrs.ContainsKey(key) || node.attrs[key] == null) return "";
+                var val = node.attrs[key];
+                if (val is string s) return s;
+                if (val is System.Text.Json.JsonElement je && je.ValueKind == System.Text.Json.JsonValueKind.String) return je.GetString();
+                return val.ToString();
+            }
             switch (nodeType)
             {
                 case "a":
                     if (node.attrs.ContainsKey("target"))
                     {
-                        return $"<a href=\"{(string)node.attrs["url"]}\" target=\"{(string)node.attrs["target"]}\">{callBack(node.children)}</a>";
+                        return $"<a href=\"{GetAttrString("url")}\" target=\"{GetAttrString("target")}\">{callBack(node.children)}</a>";
                     }
-                    return $"<a href=\"{(string)node.attrs["url"]}\">{callBack(node.children)}</a>";
+                    return $"<a href=\"{GetAttrString("url")}\">{callBack(node.children)}</a>";
             }
             return base.RenderNode(nodeType, node, callBack);
         }
