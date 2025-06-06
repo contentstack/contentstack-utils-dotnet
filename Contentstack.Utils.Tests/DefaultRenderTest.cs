@@ -178,7 +178,7 @@ namespace Contentstack.Utils.Tests
 
             string result = defaultRender.RenderNode("a", nodeLink, (nodes) => { return text; });
 
-            Assert.Equal($"<a href=\"{nodeLink.attrs["url"]}\">{text}</a>", result);
+            Assert.Equal($"<a href=\"{nodeLink.attrs["url"]}\"  target=\"{nodeLink.attrs["target"]}\" title=\"{nodeLink.attrs["title"]}\" >Text To set Link</a>", result);
         }
 
         [Fact]
