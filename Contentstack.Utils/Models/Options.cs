@@ -97,8 +97,10 @@ namespace Contentstack.Utils.Models
         {
             string href = "";
             string styleAttrs = "";
+            string target = "";
+            string title = "";
 
-            if (node.attrs.ContainsKey("style"))
+            if (node.attrs?.ContainsKey("style") == true)
             {
                 var styleVal = node.attrs["style"];
                 if (styleVal != null)
@@ -125,11 +127,20 @@ namespace Contentstack.Utils.Models
                 case "p":
                     return $"<p{styleAttrs}>{callBack(node.children)}</p>";
                 case "a":
-                    if (node.attrs.ContainsKey("url"))
+                    if (node.attrs?.ContainsKey("url")==true)
                     {
                         href = (string)node.attrs["url"];
                     }
-                    return $"<a href=\"{href}\"{styleAttrs}>{callBack(node.children)}</a>";
+                    if (node.attrs?.ContainsKey("target") == true)
+                    {
+                        target = (string)node.attrs["target"];
+                    }
+                    if (node.attrs?.ContainsKey("title") == true)
+                    {
+                        title = (string)node.attrs["title"];
+                    }
+                    return $"<a href=\"{href}\"  target=\"{target}\" title=\"{title}\" {styleAttrs}>{callBack(node.children)}</a>";
+
                 case "img":
                     if (node.attrs.ContainsKey("url"))
                     {
