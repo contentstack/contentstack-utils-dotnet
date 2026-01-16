@@ -1,3 +1,7 @@
+### Version: 1.0.7
+#### Date: January-12-2026
+- Improved error messages
+
 ### Version: 1.0.6
 #### Date: June-09-2025
 - Used 'title' and 'target' in a tags
