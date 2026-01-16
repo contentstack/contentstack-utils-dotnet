@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Contentstack.Utils.Constants;
 
 namespace Contentstack.Utils.Converters
 {
@@ -10,7 +11,7 @@ namespace Contentstack.Utils.Converters
     {
         public override bool CanConvert(Type objectType)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException(ErrorMessages.InvalidRteJson);
         }
 
         public override object ReadJson(JsonReader reader, Type objectType,
