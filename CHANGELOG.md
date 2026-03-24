@@ -1,3 +1,8 @@
+### Version: 1.1.0
+#### Date: March-24-2026
+- Added `GetVariantAliases` and `GetDataCsvariantsAttribute` for variant alias extraction and `data-csvariants` serialization; Invalid arguments throw `ArgumentException`.
+
+
 ### Version: 1.0.7
 #### Date: January-12-2026
 - Improved error messages
