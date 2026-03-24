@@ -145,5 +145,113 @@ namespace Contentstack.Utils.Tests
             Assert.True(result["data-csvariants"] != null);
             Assert.Equal("[]", result["data-csvariants"].ToString());
         }
+
+        [Fact]
+        public void GetVariantAliases_ThrowsWhenUidMissing()
+        {
+            var entry = new JObject { ["title"] = "no-uid" };
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entry, "movie"));
+        }
+
+        [Fact]
+        public void GetVariantAliases_ThrowsWhenUidNull()
+        {
+            var entry = new JObject { ["uid"] = JValue.CreateNull() };
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entry, "movie"));
+        }
+
+        [Fact]
+        public void GetVariantAliases_Batch_ThrowsWhenContentTypeUidNull()
+        {
+            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entries, null));
+        }
+
+        [Fact]
+        public void GetVariantAliases_Batch_ThrowsWhenContentTypeUidEmpty()
+        {
+            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entries, ""));
+        }
+
+        [Fact]
+        public void GetDataCsvariantsAttribute_WhenEntriesArrayNull_ReturnsEmptyArrayString()
+        {
+            JObject result = Utils.GetDataCsvariantsAttribute((JArray)null, "movie");
+            Assert.Equal("[]", result["data-csvariants"].ToString());
+        }
+
+        [Fact]
+        public void GetDataCsvariantsAttribute_Batch_ThrowsWhenContentTypeUidNull()
+        {
+            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            Assert.Throws<ArgumentException>(() => Utils.GetDataCsvariantsAttribute(entries, null));
+        }
+
+        [Fact]
+        public void GetDataCsvariantsAttribute_Batch_ThrowsWhenContentTypeUidEmpty()
+        {
+            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            Assert.Throws<ArgumentException>(() => Utils.GetDataCsvariantsAttribute(entries, ""));
+        }
+
+        [Fact]
+        public void GetVariantAliases_ReturnsEmptyVariantsWhenPublishDetailsMissing()
+        {
+            var entry = new JObject { ["uid"] = "blt_no_pd" };
+            JObject result = Utils.GetVariantAliases(entry, "movie");
+            Assert.Equal("blt_no_pd", result["entry_uid"].ToString());
+            Assert.Equal("movie", result["contenttype_uid"].ToString());
+            Assert.Empty((JArray)result["variants"]);
+        }
+
+        [Fact]
+        public void GetVariantAliases_ReturnsEmptyVariantsWhenVariantsObjectEmpty()
+        {
+            var entry = new JObject
+            {
+                ["uid"] = "blt_empty_v",
+                ["publish_details"] = new JObject
+                {
+                    ["variants"] = new JObject()
+                }
+            };
+            JObject result = Utils.GetVariantAliases(entry, "movie");
+            Assert.Empty((JArray)result["variants"]);
+        }
+
+        [Fact]
+        public void GetVariantAliases_ReturnsEmptyVariantsWhenVariantsKeyMissing()
+        {
+            var entry = new JObject
+            {
+                ["uid"] = "blt_no_variants_key",
+                ["publish_details"] = new JObject { ["time"] = "2025-01-01T00:00:00.000Z" }
+            };
+            JObject result = Utils.GetVariantAliases(entry, "movie");
+            Assert.Empty((JArray)result["variants"]);
+        }
+
+        [Fact]
+        public void GetVariantAliases_SkipsVariantWhenAliasMissingOrEmpty()
+        {
+            var entry = new JObject
+            {
+                ["uid"] = "blt_skip",
+                ["publish_details"] = new JObject
+                {
+                    ["variants"] = new JObject
+                    {
+                        ["v1"] = new JObject { ["alias"] = "keep_me" },
+                        ["v2"] = new JObject(),
+                        ["v3"] = new JObject { ["alias"] = "" }
+                    }
+                }
+            };
+            JObject result = Utils.GetVariantAliases(entry, "page");
+            var variants = (JArray)result["variants"];
+            Assert.Single(variants);
+            Assert.Equal("keep_me", variants[0].ToString());
+        }
     }
 }
