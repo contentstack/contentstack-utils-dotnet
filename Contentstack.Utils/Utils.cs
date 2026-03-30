@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Contentstack.Utils.Models;
 using HtmlAgilityPack;
 using Contentstack.Utils.Extensions;
 using Contentstack.Utils.Interfaces;
 using System;
 using Contentstack.Utils.Enums;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Contentstack.Utils
 {
@@ -285,6 +287,113 @@ namespace Contentstack.Utils
             {
                 return $"data-cslp-parent-field={dataValue}";
             }
+        }
+
+        public static JObject GetVariantAliases(JObject entry, string contentTypeUid)
+        {
+            if (string.IsNullOrEmpty(contentTypeUid))
+            {
+                throw new ArgumentException("ContentType is required.");
+            }
+            if (entry == null)
+            {
+                throw new ArgumentException("Entry must not be null.");
+            }
+            if (!entry.ContainsKey("uid") || entry["uid"] == null || entry["uid"].Type == JTokenType.Null)
+            {
+                throw new ArgumentException("Entry must contain uid.");
+            }
+
+            string entryUid = entry["uid"]?.ToString() ?? "";
+            JArray variantsArray = ExtractVariantAliasesFromEntry(entry);
+            JObject result = new JObject
+            {
+                ["entry_uid"] = entryUid,
+                ["contenttype_uid"] = contentTypeUid,
+                ["variants"] = variantsArray
+            };
+            return result;
+        }
+
+        public static JArray GetVariantAliases(JArray entries, string contentTypeUid)
+        {
+            if (string.IsNullOrEmpty(contentTypeUid))
+            {
+                throw new ArgumentException("ContentType is required.");
+            }
+            if (entries == null)
+            {
+                return new JArray();
+            }
+            JArray variantResults = new JArray();
+            foreach (JToken token in entries)
+            {
+                JObject entry = token as JObject;
+                if (entry != null && entry.ContainsKey("uid") && entry["uid"] != null && entry["uid"].Type != JTokenType.Null)
+                {
+                    variantResults.Add(GetVariantAliases(entry, contentTypeUid));
+                }
+            }
+            return variantResults;
+        }
+
+        public static JObject GetDataCsvariantsAttribute(JObject entry, string contentTypeUid)
+        {
+            if (entry == null)
+            {
+                JObject result = new JObject();
+                result["data-csvariants"] = "[]";
+                return result;
+            }
+            JArray entries = new JArray();
+            entries.Add(entry);
+            return GetDataCsvariantsAttribute(entries, contentTypeUid);
+        }
+
+        public static JObject GetDataCsvariantsAttribute(JArray entries, string contentTypeUid)
+        {
+            JObject result = new JObject();
+            if (entries == null)
+            {
+                result["data-csvariants"] = "[]";
+                return result;
+            }
+            if (string.IsNullOrEmpty(contentTypeUid))
+            {
+                throw new ArgumentException("ContentType is required.");
+            }
+
+            JArray variantResults = GetVariantAliases(entries, contentTypeUid);
+            result["data-csvariants"] = variantResults.ToString(Formatting.None);
+            return result;
+        }
+
+        private static JArray ExtractVariantAliasesFromEntry(JObject entry)
+        {
+            JArray variantArray = new JArray();
+            JObject publishDetails = entry["publish_details"] as JObject;
+            if (publishDetails == null)
+            {
+                return variantArray;
+            }
+            JObject variants = publishDetails["variants"] as JObject;
+            if (variants == null)
+            {
+                return variantArray;
+            }
+
+            foreach (JProperty prop in variants.Properties())
+            {
+                if (prop.Value is JObject valueObj)
+                {
+                    string alias = valueObj["alias"]?.ToString();
+                    if (!string.IsNullOrEmpty(alias))
+                    {
+                        variantArray.Add(alias.Trim());
+                    }
+                }
+            }
+            return variantArray;
         }
     }
 }
