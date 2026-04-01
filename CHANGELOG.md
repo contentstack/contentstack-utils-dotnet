@@ -1,7 +1,6 @@
 ### Version: 1.2.0
 #### Date: March-31-2026
 - Added `GetVariantMetadataTags(JObject, string)` and `GetVariantMetadataTags(JArray, string)` as the canonical API for building the `data-csvariants` payload (same behavior as the previous helpers).
-- `GetDataCsvariantsAttribute` is now obsolete and delegates to `GetVariantMetadataTags`; it will be removed in a future major release. Existing callers remain binary-compatible.
 
 ### Version: 1.1.0
 #### Date: March-24-2026
