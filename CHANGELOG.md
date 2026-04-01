@@ -1,3 +1,7 @@
+### Version: 1.2.0
+#### Date: March-31-2026
+- Added `GetVariantMetadataTags(JObject, string)` and `GetVariantMetadataTags(JArray, string)` as the canonical API for building the `data-csvariants` payload (same behavior as the previous helpers).
+
 ### Version: 1.1.0
 #### Date: March-24-2026
 - Added `GetVariantAliases` and `GetDataCsvariantsAttribute` for variant alias extraction and `data-csvariants` serialization; Invalid arguments throw `ArgumentException`.
