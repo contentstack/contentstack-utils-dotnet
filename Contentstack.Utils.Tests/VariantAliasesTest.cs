@@ -44,13 +44,13 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
-        public void GetDataCsvariantsAttribute_SingleEntry_ReturnsJsonArrayString()
+        public void GetVariantMetadataTags_SingleEntry_ReturnsJsonArrayString()
         {
             JObject full = ReadJsonRoot("variantsSingleEntry.json");
             JObject entry = (JObject)full["entry"];
             const string contentTypeUid = "movie";
 
-            JObject result = Utils.GetDataCsvariantsAttribute(entry, contentTypeUid);
+            JObject result = Utils.GetVariantMetadataTags(entry, contentTypeUid);
 
             Assert.True(result["data-csvariants"] != null);
             string dataCsvariantsStr = result["data-csvariants"].ToString();
@@ -96,13 +96,13 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
-        public void GetDataCsvariantsAttribute_MultipleEntries_ReturnsJsonArrayString()
+        public void GetVariantMetadataTags_MultipleEntries_ReturnsJsonArrayString()
         {
             JObject full = ReadJsonRoot("variantsEntries.json");
             JArray entries = (JArray)full["entries"];
             const string contentTypeUid = "movie";
 
-            JObject result = Utils.GetDataCsvariantsAttribute(entries, contentTypeUid);
+            JObject result = Utils.GetVariantMetadataTags(entries, contentTypeUid);
 
             Assert.True(result["data-csvariants"] != null);
             string dataCsvariantsStr = result["data-csvariants"].ToString();
@@ -139,9 +139,9 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
-        public void GetDataCsvariantsAttribute_WhenEntryNull_ReturnsEmptyArrayString()
+        public void GetVariantMetadataTags_WhenEntryNull_ReturnsEmptyArrayString()
         {
-            JObject result = Utils.GetDataCsvariantsAttribute((JObject)null, "landing_page");
+            JObject result = Utils.GetVariantMetadataTags((JObject)null, "landing_page");
             Assert.True(result["data-csvariants"] != null);
             Assert.Equal("[]", result["data-csvariants"].ToString());
         }
@@ -175,24 +175,52 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
-        public void GetDataCsvariantsAttribute_WhenEntriesArrayNull_ReturnsEmptyArrayString()
+        public void GetVariantMetadataTags_WhenEntriesArrayNull_ReturnsEmptyArrayString()
         {
-            JObject result = Utils.GetDataCsvariantsAttribute((JArray)null, "movie");
+            JObject result = Utils.GetVariantMetadataTags((JArray)null, "movie");
             Assert.Equal("[]", result["data-csvariants"].ToString());
         }
 
         [Fact]
-        public void GetDataCsvariantsAttribute_Batch_ThrowsWhenContentTypeUidNull()
+        public void GetVariantMetadataTags_Batch_ThrowsWhenContentTypeUidNull()
         {
             var entries = new JArray { new JObject { ["uid"] = "a" } };
-            Assert.Throws<ArgumentException>(() => Utils.GetDataCsvariantsAttribute(entries, null));
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantMetadataTags(entries, null));
         }
 
         [Fact]
-        public void GetDataCsvariantsAttribute_Batch_ThrowsWhenContentTypeUidEmpty()
+        public void GetVariantMetadataTags_Batch_ThrowsWhenContentTypeUidEmpty()
         {
             var entries = new JArray { new JObject { ["uid"] = "a" } };
-            Assert.Throws<ArgumentException>(() => Utils.GetDataCsvariantsAttribute(entries, ""));
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantMetadataTags(entries, ""));
+        }
+
+        [Fact]
+        public void GetDataCsvariantsAttribute_DelegatesToGetVariantMetadataTags()
+        {
+#pragma warning disable CS0618 // Type or member is obsolete — intentional coverage of backward-compatible alias
+            JObject full = ReadJsonRoot("variantsSingleEntry.json");
+            JObject entry = (JObject)full["entry"];
+            const string contentTypeUid = "movie";
+
+            JObject canonical = Utils.GetVariantMetadataTags(entry, contentTypeUid);
+            JObject legacy = Utils.GetDataCsvariantsAttribute(entry, contentTypeUid);
+            Assert.True(JToken.DeepEquals(canonical, legacy));
+
+            JObject fullMulti = ReadJsonRoot("variantsEntries.json");
+            JArray entries = (JArray)fullMulti["entries"];
+            JObject canonicalBatch = Utils.GetVariantMetadataTags(entries, contentTypeUid);
+            JObject legacyBatch = Utils.GetDataCsvariantsAttribute(entries, contentTypeUid);
+            Assert.True(JToken.DeepEquals(canonicalBatch, legacyBatch));
+
+            JObject nullEntryLegacy = Utils.GetDataCsvariantsAttribute((JObject)null, "x");
+            JObject nullEntryCanonical = Utils.GetVariantMetadataTags((JObject)null, "x");
+            Assert.True(JToken.DeepEquals(nullEntryCanonical, nullEntryLegacy));
+
+            JObject nullArrLegacy = Utils.GetDataCsvariantsAttribute((JArray)null, "x");
+            JObject nullArrCanonical = Utils.GetVariantMetadataTags((JArray)null, "x");
+            Assert.True(JToken.DeepEquals(nullArrCanonical, nullArrLegacy));
+#pragma warning restore CS0618
         }
 
         [Fact]

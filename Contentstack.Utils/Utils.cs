@@ -337,7 +337,13 @@ namespace Contentstack.Utils
             return variantResults;
         }
 
-        public static JObject GetDataCsvariantsAttribute(JObject entry, string contentTypeUid)
+        /// <summary>
+        /// Builds the JSON object used for the <c>data-csvariants</c> HTML attribute payload from a single entry.
+        /// </summary>
+        /// <param name="entry">Entry JSON (e.g. from the Delivery API), or <c>null</c> to produce an empty payload.</param>
+        /// <param name="contentTypeUid">Content type UID for the entry.</param>
+        /// <returns>A <see cref="JObject"/> with a <c>data-csvariants</c> key whose value is a compact JSON array string.</returns>
+        public static JObject GetVariantMetadataTags(JObject entry, string contentTypeUid)
         {
             if (entry == null)
             {
@@ -347,10 +353,16 @@ namespace Contentstack.Utils
             }
             JArray entries = new JArray();
             entries.Add(entry);
-            return GetDataCsvariantsAttribute(entries, contentTypeUid);
+            return GetVariantMetadataTags(entries, contentTypeUid);
         }
 
-        public static JObject GetDataCsvariantsAttribute(JArray entries, string contentTypeUid)
+        /// <summary>
+        /// Builds the JSON object used for the <c>data-csvariants</c> HTML attribute payload from multiple entries.
+        /// </summary>
+        /// <param name="entries">Array of entry JSON objects, or <c>null</c> to produce an empty payload.</param>
+        /// <param name="contentTypeUid">Content type UID shared by these entries.</param>
+        /// <returns>A <see cref="JObject"/> with a <c>data-csvariants</c> key whose value is a compact JSON array string.</returns>
+        public static JObject GetVariantMetadataTags(JArray entries, string contentTypeUid)
         {
             JObject result = new JObject();
             if (entries == null)
@@ -366,6 +378,24 @@ namespace Contentstack.Utils
             JArray variantResults = GetVariantAliases(entries, contentTypeUid);
             result["data-csvariants"] = variantResults.ToString(Formatting.None);
             return result;
+        }
+
+        /// <summary>
+        /// Prefer <see cref="GetVariantMetadataTags(JObject, string)"/>. This alias exists for backward compatibility and will be removed in a future major release.
+        /// </summary>
+        [Obsolete("Use GetVariantMetadataTags instead. This method will be removed in a future major release.")]
+        public static JObject GetDataCsvariantsAttribute(JObject entry, string contentTypeUid)
+        {
+            return GetVariantMetadataTags(entry, contentTypeUid);
+        }
+
+        /// <summary>
+        /// Prefer <see cref="GetVariantMetadataTags(JArray, string)"/>. This alias exists for backward compatibility and will be removed in a future major release.
+        /// </summary>
+        [Obsolete("Use GetVariantMetadataTags instead. This method will be removed in a future major release.")]
+        public static JObject GetDataCsvariantsAttribute(JArray entries, string contentTypeUid)
+        {
+            return GetVariantMetadataTags(entries, contentTypeUid);
         }
 
         private static JArray ExtractVariantAliasesFromEntry(JObject entry)
