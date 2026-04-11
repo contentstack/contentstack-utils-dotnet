@@ -58,7 +58,4 @@ description: Use for branches, build/pack, test scripts, CI workflows, versionin
 
 ## References
 
-- [`skills/testing/SKILL.md`](../testing/SKILL.md) — test project and coverage.
-- [`skills/contentstack-utils/SKILL.md`](../contentstack-utils/SKILL.md) — library API and boundaries.
-- [`skills/code-review/SKILL.md`](../code-review/SKILL.md) — PR checklist.
 - [GitHub Actions documentation](https://docs.github.com/actions) — workflow syntax and secrets.

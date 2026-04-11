@@ -38,8 +38,3 @@ Under [`Contentstack.Utils/`](../../Contentstack.Utils/), place new code accordi
 
 - **Library** ([`Contentstack.Utils.csproj`](../../Contentstack.Utils/Contentstack.Utils.csproj)): **netstandard2.0**, **net47**, **net472**. Public APIs must be implementable on all targets; avoid APIs that only compile on .NET 5+ unless you intentionally raise baselines with a major version policy.
 - **Tests** ([`Contentstack.Utils.Tests.csproj`](../../Contentstack.Utils.Tests/Contentstack.Utils.Tests.csproj)): **net7.0** only—fine for test-only APIs; do not assume test-only APIs exist in the library.
-
-## References
-
-- [`skills/contentstack-utils/SKILL.md`](../contentstack-utils/SKILL.md) — what belongs in the public API.
-- [`skills/testing/SKILL.md`](../testing/SKILL.md) — test project structure.

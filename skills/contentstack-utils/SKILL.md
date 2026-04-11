@@ -121,7 +121,5 @@ flowchart TD
 
 ## References
 
-- [`skills/csharp-style/SKILL.md`](../csharp-style/SKILL.md) — layout and naming in this repo.
-- [`skills/testing/SKILL.md`](../testing/SKILL.md) — how to test API changes.
 - [Product README](../../README.md) — install and usage examples.
 - [Contentstack .NET Utils on NuGet](https://www.nuget.org/packages/contentstack.utils) — package listing (verify version).

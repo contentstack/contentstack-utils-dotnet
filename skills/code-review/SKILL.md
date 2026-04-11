@@ -29,9 +29,3 @@ description: Use for PR expectations, review checklist, docs/changelog, and secu
 ### Severity labels (optional)
 
 Teams may use **Blocker** (must fix before merge), **Major** (should fix or track), **Minor** (nit / follow-up)—keep comments actionable.
-
-## References
-
-- [`skills/dev-workflow/SKILL.md`](../dev-workflow/SKILL.md) — CI and branch rules.
-- [`skills/testing/SKILL.md`](../testing/SKILL.md) — how to add tests.
-- [`skills/contentstack-utils/SKILL.md`](../contentstack-utils/SKILL.md) — API surface and boundaries.

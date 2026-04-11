@@ -57,8 +57,3 @@ Use these as a map of coverage areas when adding related behavior:
 ### CI alignment
 
 - GitHub Actions runs [`Scripts/run-unit-test-case.sh`](../../Scripts/run-unit-test-case.sh) on **Windows**. When reproducing CI failures, use that script (or the same `dotnet test` arguments) from repo root.
-
-## References
-
-- [`skills/dev-workflow/SKILL.md`](../dev-workflow/SKILL.md) — scripts and workflows.
-- [`skills/contentstack-utils/SKILL.md`](../contentstack-utils/SKILL.md) — APIs under test.
