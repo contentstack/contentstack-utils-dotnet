@@ -55,8 +55,6 @@
 | Contentstack Utils (API) | [`skills/contentstack-utils/SKILL.md`](skills/contentstack-utils/SKILL.md) | Public API, package boundaries, `Utils` / GQL / variants, dependencies. |
 | C# style (this repo) | [`skills/csharp-style/SKILL.md`](skills/csharp-style/SKILL.md) | Folder layout, namespaces, naming consistency, TFMs. |
 
-An index with “when to use” hints is in [`skills/README.md`](skills/README.md).
-
 ## Using Cursor (optional)
 
 If you use **Cursor**, [`.cursor/rules/README.md`](.cursor/rules/README.md) only points to **[`AGENTS.md`](AGENTS.md)** at the repo root. All conventions live in **`skills/*/SKILL.md`**—same docs as for any other tool.
