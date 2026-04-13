@@ -118,8 +118,3 @@ flowchart TD
   meta --> resolve[findEmbeddedObject_embeddedItems]
   resolve --> replace[Replace_OuterHTML_with_RenderOption]
 ```
-
-## References
-
-- [Product README](../../README.md) — install and usage examples.
-- [Contentstack .NET Utils on NuGet](https://www.nuget.org/packages/contentstack.utils) — package listing (verify version).

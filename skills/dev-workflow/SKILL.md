@@ -55,7 +55,3 @@ description: Use for branches, build/pack, test scripts, CI workflows, versionin
 ### Talisman
 
 - [`.talismanrc`](../../.talismanrc) pins checksums for specific files. Do not add ignores or weaken checks without security team agreement.
-
-## References
-
-- [GitHub Actions documentation](https://docs.github.com/actions) — workflow syntax and secrets.
