@@ -35,13 +35,9 @@ class TestReportGenerator:
         self.file_coverage = []
 
     def parse_trx(self):
-        # Create a secure XML parser that disables external entity processing
-        parser = ET.XMLParser()
-        parser.parser.DefaultHandler = lambda data: None
-        parser.parser.ExternalEntityRefHandler = lambda context, base, uri, notationName: False
-        parser.parser.EntityDeclHandler = lambda entityName, is_parameter_entity, value, base, systemId, notationName, publicId: False
-        
-        tree = ET.parse(self.trx_path, parser)
+        # Use defusedxml for secure XML parsing
+        from defusedxml.ElementTree import parse
+        tree = parse(self.trx_path)
         root = tree.getroot()
         ns = {'t': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}
 
@@ -121,13 +117,9 @@ class TestReportGenerator:
         if not self.coverage_path or not os.path.exists(self.coverage_path):
             return
         try:
-            # Create a secure XML parser that disables external entity processing
-            parser = ET.XMLParser()
-            parser.parser.DefaultHandler = lambda data: None
-            parser.parser.ExternalEntityRefHandler = lambda context, base, uri, notationName: False
-            parser.parser.EntityDeclHandler = lambda entityName, is_parameter_entity, value, base, systemId, notationName, publicId: False
-            
-            tree = ET.parse(self.coverage_path, parser)
+            # Use defusedxml for secure XML parsing
+            from defusedxml.ElementTree import parse
+            tree = parse(self.coverage_path)
             root = tree.getroot()
             self.coverage['lines_pct'] = float(root.get('line-rate', 0)) * 100
             self.coverage['branches_pct'] = float(root.get('branch-rate', 0)) * 100
@@ -222,6 +214,18 @@ class TestReportGenerator:
         return 0, 0
 
     @staticmethod
+    def _esc(text):
+        if text is None:
+            return ""
+        text = str(text)
+        return (text
+                .replace('&', '&amp;')
+                .replace('<', '&lt;')
+                .replace('>', '&gt;')
+                .replace('"', '&quot;')
+                .replace("'", '&#39;'))
+
+    @staticmethod
     def _sanitize_xml_attribute_value(value):
         """Sanitize XML attribute value to prevent XPath injection."""
         if not value:
@@ -258,18 +262,6 @@ class TestReportGenerator:
             raise ValueError(f"Output path must be an HTML file: {output_path}")
             
         return normalized_path
-
-    @staticmethod
-    def _esc(text):
-        if text is None:
-            return ""
-        text = str(text)
-        return (text
-                .replace('&', '&amp;')
-                .replace('<', '&lt;')
-                .replace('>', '&gt;')
-                .replace('"', '&quot;')
-                .replace("'", '&#39;'))
 
     def _format_duration_display(self, seconds):
         if seconds < 60:
