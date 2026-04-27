@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Contentstack.Utils;
 using Contentstack.Utils.Interfaces;
 using Contentstack.Utils.Models;
 using HtmlAgilityPack;
@@ -17,9 +18,9 @@ namespace Contentstack.Utils.Tests.Mocks
                 case "a":
                     if (node.attrs.ContainsKey("target"))
                     {
-                        return $"<a href=\"{(string)node.attrs["url"]}\" target=\"{(string)node.attrs["target"]}\">{callBack(node.children)}</a>";
+                        return $"<a href=\"{JsonAttrValue.AsString(node.attrs["url"])}\" target=\"{JsonAttrValue.AsString(node.attrs["target"])}\">{callBack(node.children)}</a>";
                     }
-                    return $"<a href=\"{(string)node.attrs["url"]}\">{callBack(node.children)}</a>";
+                    return $"<a href=\"{JsonAttrValue.AsString(node.attrs["url"])}\">{callBack(node.children)}</a>";
             }
             return base.RenderNode(nodeType, node, callBack);
         }

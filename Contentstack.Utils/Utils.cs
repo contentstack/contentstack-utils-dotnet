@@ -5,8 +5,8 @@ using Contentstack.Utils.Extensions;
 using Contentstack.Utils.Interfaces;
 using System;
 using Contentstack.Utils.Enums;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Contentstack.Utils
 {
@@ -289,7 +289,16 @@ namespace Contentstack.Utils
             }
         }
 
-        public static JObject GetVariantAliases(JObject entry, string contentTypeUid)
+        private static readonly JsonSerializerOptions CompactJsonOptions = new JsonSerializerOptions { WriteIndented = false };
+
+        private static bool IsJsonNull(JsonNode node)
+        {
+            if (node == null)
+                return true;
+            return node is JsonValue jv && jv.GetValueKind() == JsonValueKind.Null;
+        }
+
+        public static JsonObject GetVariantAliases(JsonObject entry, string contentTypeUid)
         {
             if (string.IsNullOrEmpty(contentTypeUid))
             {
@@ -299,14 +308,14 @@ namespace Contentstack.Utils
             {
                 throw new ArgumentException("Entry must not be null.");
             }
-            if (!entry.ContainsKey("uid") || entry["uid"] == null || entry["uid"].Type == JTokenType.Null)
+            if (!entry.TryGetPropertyValue("uid", out JsonNode uidNode) || IsJsonNull(uidNode))
             {
                 throw new ArgumentException("Entry must contain uid.");
             }
 
-            string entryUid = entry["uid"]?.ToString() ?? "";
-            JArray variantsArray = ExtractVariantAliasesFromEntry(entry);
-            JObject result = new JObject
+            string entryUid = uidNode?.ToString() ?? "";
+            JsonArray variantsArray = ExtractVariantAliasesFromEntry(entry);
+            var result = new JsonObject
             {
                 ["entry_uid"] = entryUid,
                 ["contenttype_uid"] = contentTypeUid,
@@ -315,7 +324,7 @@ namespace Contentstack.Utils
             return result;
         }
 
-        public static JArray GetVariantAliases(JArray entries, string contentTypeUid)
+        public static JsonArray GetVariantAliases(JsonArray entries, string contentTypeUid)
         {
             if (string.IsNullOrEmpty(contentTypeUid))
             {
@@ -323,13 +332,15 @@ namespace Contentstack.Utils
             }
             if (entries == null)
             {
-                return new JArray();
+                return new JsonArray();
             }
-            JArray variantResults = new JArray();
-            foreach (JToken token in entries)
+            var variantResults = new JsonArray();
+            foreach (JsonNode token in entries)
             {
-                JObject entry = token as JObject;
-                if (entry != null && entry.ContainsKey("uid") && entry["uid"] != null && entry["uid"].Type != JTokenType.Null)
+                if (token is JsonObject entry &&
+                    entry.TryGetPropertyValue("uid", out JsonNode uidNode) &&
+                    uidNode != null &&
+                    !IsJsonNull(uidNode))
                 {
                     variantResults.Add(GetVariantAliases(entry, contentTypeUid));
                 }
@@ -342,17 +353,17 @@ namespace Contentstack.Utils
         /// </summary>
         /// <param name="entry">Entry JSON (e.g. from the Delivery API), or <c>null</c> to produce an empty payload.</param>
         /// <param name="contentTypeUid">Content type UID for the entry.</param>
-        /// <returns>A <see cref="JObject"/> with a <c>data-csvariants</c> key whose value is a compact JSON array string.</returns>
-        public static JObject GetVariantMetadataTags(JObject entry, string contentTypeUid)
+        /// <returns>A <see cref="JsonObject"/> with a <c>data-csvariants</c> key whose value is a compact JSON array string.</returns>
+        public static JsonObject GetVariantMetadataTags(JsonObject entry, string contentTypeUid)
         {
             if (entry == null)
             {
-                JObject result = new JObject();
-                result["data-csvariants"] = "[]";
-                return result;
+                var empty = new JsonObject();
+                empty["data-csvariants"] = "[]";
+                return empty;
             }
-            JArray entries = new JArray();
-            entries.Add(entry);
+            var entries = new JsonArray();
+            entries.Add(entry.DeepClone());
             return GetVariantMetadataTags(entries, contentTypeUid);
         }
 
@@ -361,10 +372,10 @@ namespace Contentstack.Utils
         /// </summary>
         /// <param name="entries">Array of entry JSON objects, or <c>null</c> to produce an empty payload.</param>
         /// <param name="contentTypeUid">Content type UID shared by these entries.</param>
-        /// <returns>A <see cref="JObject"/> with a <c>data-csvariants</c> key whose value is a compact JSON array string.</returns>
-        public static JObject GetVariantMetadataTags(JArray entries, string contentTypeUid)
+        /// <returns>A <see cref="JsonObject"/> with a <c>data-csvariants</c> key whose value is a compact JSON array string.</returns>
+        public static JsonObject GetVariantMetadataTags(JsonArray entries, string contentTypeUid)
         {
-            JObject result = new JObject();
+            var result = new JsonObject();
             if (entries == null)
             {
                 result["data-csvariants"] = "[]";
@@ -375,46 +386,44 @@ namespace Contentstack.Utils
                 throw new ArgumentException("ContentType is required.");
             }
 
-            JArray variantResults = GetVariantAliases(entries, contentTypeUid);
-            result["data-csvariants"] = variantResults.ToString(Formatting.None);
+            JsonArray variantResults = GetVariantAliases(entries, contentTypeUid);
+            result["data-csvariants"] = variantResults.ToJsonString(CompactJsonOptions);
             return result;
         }
 
         /// <summary>
-        /// Prefer <see cref="GetVariantMetadataTags(JObject, string)"/>. This alias exists for backward compatibility and will be removed in a future major release.
+        /// Prefer <see cref="GetVariantMetadataTags(JsonObject, string)"/>. This alias exists for backward compatibility and will be removed in a future major release.
         /// </summary>
         [Obsolete("Use GetVariantMetadataTags instead. This method will be removed in a future major release.")]
-        public static JObject GetDataCsvariantsAttribute(JObject entry, string contentTypeUid)
+        public static JsonObject GetDataCsvariantsAttribute(JsonObject entry, string contentTypeUid)
         {
             return GetVariantMetadataTags(entry, contentTypeUid);
         }
 
         /// <summary>
-        /// Prefer <see cref="GetVariantMetadataTags(JArray, string)"/>. This alias exists for backward compatibility and will be removed in a future major release.
+        /// Prefer <see cref="GetVariantMetadataTags(JsonArray, string)"/>. This alias exists for backward compatibility and will be removed in a future major release.
         /// </summary>
         [Obsolete("Use GetVariantMetadataTags instead. This method will be removed in a future major release.")]
-        public static JObject GetDataCsvariantsAttribute(JArray entries, string contentTypeUid)
+        public static JsonObject GetDataCsvariantsAttribute(JsonArray entries, string contentTypeUid)
         {
             return GetVariantMetadataTags(entries, contentTypeUid);
         }
 
-        private static JArray ExtractVariantAliasesFromEntry(JObject entry)
+        private static JsonArray ExtractVariantAliasesFromEntry(JsonObject entry)
         {
-            JArray variantArray = new JArray();
-            JObject publishDetails = entry["publish_details"] as JObject;
-            if (publishDetails == null)
+            var variantArray = new JsonArray();
+            if (!entry.TryGetPropertyValue("publish_details", out JsonNode pdNode) || pdNode is not JsonObject publishDetails)
             {
                 return variantArray;
             }
-            JObject variants = publishDetails["variants"] as JObject;
-            if (variants == null)
+            if (!publishDetails.TryGetPropertyValue("variants", out JsonNode vNode) || vNode is not JsonObject variants)
             {
                 return variantArray;
             }
 
-            foreach (JProperty prop in variants.Properties())
+            foreach (KeyValuePair<string, JsonNode> kvp in variants)
             {
-                if (prop.Value is JObject valueObj)
+                if (kvp.Value is JsonObject valueObj)
                 {
                     string alias = valueObj["alias"]?.ToString();
                     if (!string.IsNullOrEmpty(alias))

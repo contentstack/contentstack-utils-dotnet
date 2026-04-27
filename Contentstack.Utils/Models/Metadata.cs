@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using Contentstack.Utils;
 using Contentstack.Utils.Enums;
 using HtmlAgilityPack;
 
@@ -71,13 +72,13 @@ namespace Contentstack.Utils.Models
         public static implicit operator Metadata(Node node) 
         {
             StyleType styleType;
-            if (!node.attrs.ContainsKey("display-type") || !(Enum.TryParse((string)node.attrs["display-type"], true, out styleType)))
+            if (!node.attrs.ContainsKey("display-type") || !(Enum.TryParse(JsonAttrValue.AsString(node.attrs["display-type"]), true, out styleType)))
             {
                 styleType = StyleType.Block;
             }
 
             EmbedItemType embedItemType;
-            if (!node.attrs.ContainsKey("type") || !(Enum.TryParse((string)node.attrs["type"], true, out embedItemType)))
+            if (!node.attrs.ContainsKey("type") || !(Enum.TryParse(JsonAttrValue.AsString(node.attrs["type"]), true, out embedItemType)))
             {
                 embedItemType = EmbedItemType.Entry;
             }
@@ -89,10 +90,10 @@ namespace Contentstack.Utils.Models
             string itemUID = "";
             if (node.attrs.ContainsKey("entry-uid"))
             {
-                itemUID = (string)node.attrs["entry-uid"];
+                itemUID = JsonAttrValue.AsString(node.attrs["entry-uid"]);
             }else if (node.attrs.ContainsKey("asset-uid"))
             {
-                itemUID = (string)node.attrs["asset-uid"];
+                itemUID = JsonAttrValue.AsString(node.attrs["asset-uid"]);
             }
 
             return new Metadata()
@@ -102,7 +103,7 @@ namespace Contentstack.Utils.Models
                 StyleType = styleType,
                 ItemType = embedItemType,
                 ItemUid = itemUID,
-                ContentTypeUid = node.attrs.ContainsKey("content-type-uid") ? (string)node.attrs["content-type-uid"] : "",
+                ContentTypeUid = node.attrs.ContainsKey("content-type-uid") ? JsonAttrValue.AsString(node.attrs["content-type-uid"]) : "",
                 attributes = node.attrs
             };
 
