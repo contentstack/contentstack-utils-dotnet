@@ -38,7 +38,7 @@
 | Workflow | Trigger | Role |
 |----------|---------|------|
 | [`unit-test.yml`](.github/workflows/unit-test.yml) | `pull_request`, `push` | Windows: unit tests via `Scripts/run-unit-test-case.sh`. |
-| [`check-branch.yml`](.github/workflows/check-branch.yml) | `pull_request` | Merges into **`master`** are only allowed from **`staging`** (otherwise fails with a PR comment). |
+| [`back-merge-pr.yml`](.github/workflows/back-merge-pr.yml) | `push` on `master`, manual dispatch | Opens automated back-merge PRs from `master` to `development` to keep branches aligned. |
 | [`nuget-publish.yml`](.github/workflows/nuget-publish.yml) | `release` (created) | `dotnet pack -c Release -o out`; push package to NuGet.org and GitHub Packages. |
 | [`sca-scan.yml`](.github/workflows/sca-scan.yml) | PR (opened, synchronize, reopened) | Ubuntu: `dotnet restore`, **Snyk** `snyk test` under `Contentstack.Utils`. |
 | [`policy-scan.yml`](.github/workflows/policy-scan.yml) | PR (public repos) | Requires `SECURITY.md` and a license file containing the current year. |

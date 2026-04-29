@@ -15,7 +15,7 @@ description: Use for PR expectations, review checklist, docs/changelog, and secu
 
 ### Branch and ownership
 
-- Merges into **`master`** are expected from **`staging`** only (see [`check-branch.yml`](../../.github/workflows/check-branch.yml)). Align your PR base/head with team process.
+- Align PRs with the direct release flow **`development` -> `master`** (no `staging` gate in the release path).
 - [`CODEOWNERS`](../../CODEOWNERS) may request reviews from **`@contentstack/devex-pr-reviewers`** and security admins for workflow or `.snyk` changes.
 
 ### Checklist
