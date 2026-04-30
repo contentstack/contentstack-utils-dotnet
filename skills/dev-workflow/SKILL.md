@@ -15,7 +15,8 @@ description: Use for branches, build/pack, test scripts, CI workflows, versionin
 
 ### Branching and merges
 
-- [`.github/workflows/check-branch.yml`](../../.github/workflows/check-branch.yml) runs on **pull requests**. If the base branch is **`master`** and the head branch is **not** **`staging`**, the job fails and [thollander/actions-comment-pull-request](https://github.com/thollander/actions-comment-pull-request) posts an explanatory comment. To merge into `master`, open a PR **from `staging`** (per current org policy).
+- Release flow is direct **`development` -> `master`** (no `staging` promotion step).
+- [`.github/workflows/back-merge-pr.yml`](../../.github/workflows/back-merge-pr.yml) opens an automated PR from `master` back to `development` after changes land on `master`.
 
 ### Versioning
 
@@ -40,7 +41,7 @@ description: Use for branches, build/pack, test scripts, CI workflows, versionin
 | Workflow | Purpose |
 |----------|---------|
 | `unit-test.yml` | Windows unit tests via `run-unit-test-case.sh`. |
-| `check-branch.yml` | Enforce `staging` → `master` for PRs. |
+| `back-merge-pr.yml` | Auto-open `master` → `development` back-merge PRs. |
 | `nuget-publish.yml` | Pack and push on release. |
 | `sca-scan.yml` | `dotnet restore` + **Snyk** `snyk test` in `Contentstack.Utils` (needs `SNYK_TOKEN`). |
 | `policy-scan.yml` | For **public** repos: `SECURITY.md` and license file with current calendar year. |
