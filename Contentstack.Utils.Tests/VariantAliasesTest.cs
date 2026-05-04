@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 using Xunit;
 
 namespace Contentstack.Utils.Tests
 {
     public class VariantAliasesTest
     {
-        private static JObject ReadJsonRoot(string fileName)
+        private static JsonObject ReadJsonRoot(string fileName)
         {
             var path = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
-            return JObject.Parse(File.ReadAllText(path));
+            return JsonNode.Parse(File.ReadAllText(path)).AsObject();
         }
 
-        private static HashSet<string> JsonArrayToStringSet(JArray arr)
+        private static HashSet<string> JsonArrayToStringSet(JsonArray arr)
         {
             var set = new HashSet<string>();
             foreach (var t in arr)
@@ -27,15 +27,15 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void GetVariantAliases_SingleEntry_ReturnsAliases()
         {
-            JObject full = ReadJsonRoot("variantsSingleEntry.json");
-            JObject entry = (JObject)full["entry"];
+            JsonObject full = ReadJsonRoot("variantsSingleEntry.json");
+            JsonObject entry = full["entry"].AsObject();
             const string contentTypeUid = "movie";
 
-            JObject result = Utils.GetVariantAliases(entry, contentTypeUid);
+            JsonObject result = Utils.GetVariantAliases(entry, contentTypeUid);
 
             Assert.True(result["entry_uid"] != null && !string.IsNullOrEmpty(result["entry_uid"].ToString()));
             Assert.Equal(contentTypeUid, result["contenttype_uid"].ToString());
-            JArray variants = (JArray)result["variants"];
+            JsonArray variants = result["variants"].AsArray();
             Assert.NotNull(variants);
             var aliasSet = JsonArrayToStringSet(variants);
             Assert.Equal(
@@ -46,20 +46,20 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void GetVariantMetadataTags_SingleEntry_ReturnsJsonArrayString()
         {
-            JObject full = ReadJsonRoot("variantsSingleEntry.json");
-            JObject entry = (JObject)full["entry"];
+            JsonObject full = ReadJsonRoot("variantsSingleEntry.json");
+            JsonObject entry = full["entry"].AsObject();
             const string contentTypeUid = "movie";
 
-            JObject result = Utils.GetVariantMetadataTags(entry, contentTypeUid);
+            JsonObject result = Utils.GetVariantMetadataTags(entry, contentTypeUid);
 
             Assert.True(result["data-csvariants"] != null);
             string dataCsvariantsStr = result["data-csvariants"].ToString();
-            JArray arr = JArray.Parse(dataCsvariantsStr);
+            JsonArray arr = JsonNode.Parse(dataCsvariantsStr).AsArray();
             Assert.Single(arr);
-            JObject first = (JObject)arr[0];
+            JsonObject first = arr[0].AsObject();
             Assert.True(first["entry_uid"] != null && !string.IsNullOrEmpty(first["entry_uid"].ToString()));
             Assert.Equal(contentTypeUid, first["contenttype_uid"].ToString());
-            var aliasSet = JsonArrayToStringSet((JArray)first["variants"]);
+            var aliasSet = JsonArrayToStringSet(first["variants"].AsArray());
             Assert.Equal(
                 new HashSet<string> { "cs_personalize_0_0", "cs_personalize_0_3" },
                 aliasSet);
@@ -68,80 +68,80 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void GetVariantAliases_MultipleEntries_ReturnsOneResultPerEntryWithUid()
         {
-            JObject full = ReadJsonRoot("variantsEntries.json");
-            JArray entries = (JArray)full["entries"];
+            JsonObject full = ReadJsonRoot("variantsEntries.json");
+            JsonArray entries = full["entries"].AsArray();
             const string contentTypeUid = "movie";
 
-            JArray result = Utils.GetVariantAliases(entries, contentTypeUid);
+            JsonArray result = Utils.GetVariantAliases(entries, contentTypeUid);
 
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
 
-            JObject first = (JObject)result[0];
+            JsonObject first = result[0].AsObject();
             Assert.True(first["entry_uid"] != null && !string.IsNullOrEmpty(first["entry_uid"].ToString()));
             Assert.Equal(contentTypeUid, first["contenttype_uid"].ToString());
-            var firstSet = JsonArrayToStringSet((JArray)first["variants"]);
+            var firstSet = JsonArrayToStringSet(first["variants"].AsArray());
             Assert.Equal(
                 new HashSet<string> { "cs_personalize_0_0", "cs_personalize_0_3" },
                 firstSet);
 
-            JObject second = (JObject)result[1];
+            JsonObject second = result[1].AsObject();
             Assert.True(second["entry_uid"] != null && !string.IsNullOrEmpty(second["entry_uid"].ToString()));
-            Assert.Single((JArray)second["variants"]);
-            Assert.Equal("cs_personalize_0_0", ((JArray)second["variants"])[0].ToString());
+            Assert.Single(second["variants"].AsArray());
+            Assert.Equal("cs_personalize_0_0", second["variants"].AsArray()[0].ToString());
 
-            JObject third = (JObject)result[2];
+            JsonObject third = result[2].AsObject();
             Assert.True(third["entry_uid"] != null && !string.IsNullOrEmpty(third["entry_uid"].ToString()));
-            Assert.Empty((JArray)third["variants"]);
+            Assert.Empty(third["variants"].AsArray());
         }
 
         [Fact]
         public void GetVariantMetadataTags_MultipleEntries_ReturnsJsonArrayString()
         {
-            JObject full = ReadJsonRoot("variantsEntries.json");
-            JArray entries = (JArray)full["entries"];
+            JsonObject full = ReadJsonRoot("variantsEntries.json");
+            JsonArray entries = full["entries"].AsArray();
             const string contentTypeUid = "movie";
 
-            JObject result = Utils.GetVariantMetadataTags(entries, contentTypeUid);
+            JsonObject result = Utils.GetVariantMetadataTags(entries, contentTypeUid);
 
             Assert.True(result["data-csvariants"] != null);
             string dataCsvariantsStr = result["data-csvariants"].ToString();
-            JArray arr = JArray.Parse(dataCsvariantsStr);
+            JsonArray arr = JsonNode.Parse(dataCsvariantsStr).AsArray();
             Assert.Equal(3, arr.Count);
-            Assert.True(((JObject)arr[0])["entry_uid"] != null && !string.IsNullOrEmpty(((JObject)arr[0])["entry_uid"].ToString()));
-            Assert.Equal(2, ((JArray)((JObject)arr[0])["variants"]).Count);
-            Assert.True(((JObject)arr[1])["entry_uid"] != null && !string.IsNullOrEmpty(((JObject)arr[1])["entry_uid"].ToString()));
-            Assert.Single((JArray)((JObject)arr[1])["variants"]);
-            Assert.True(((JObject)arr[2])["entry_uid"] != null && !string.IsNullOrEmpty(((JObject)arr[2])["entry_uid"].ToString()));
-            Assert.Empty((JArray)((JObject)arr[2])["variants"]);
+            Assert.True(arr[0].AsObject()["entry_uid"] != null && !string.IsNullOrEmpty(arr[0].AsObject()["entry_uid"].ToString()));
+            Assert.Equal(2, arr[0].AsObject()["variants"].AsArray().Count);
+            Assert.True(arr[1].AsObject()["entry_uid"] != null && !string.IsNullOrEmpty(arr[1].AsObject()["entry_uid"].ToString()));
+            Assert.Single(arr[1].AsObject()["variants"].AsArray());
+            Assert.True(arr[2].AsObject()["entry_uid"] != null && !string.IsNullOrEmpty(arr[2].AsObject()["entry_uid"].ToString()));
+            Assert.Empty(arr[2].AsObject()["variants"].AsArray());
         }
 
         [Fact]
         public void GetVariantAliases_ThrowsWhenEntryNull()
         {
-            Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases((JObject)null, "landing_page"));
+            Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases((JsonObject)null, "landing_page"));
         }
 
         [Fact]
         public void GetVariantAliases_ThrowsWhenContentTypeUidNull()
         {
-            JObject full = ReadJsonRoot("variantsSingleEntry.json");
-            JObject entry = (JObject)full["entry"];
+            JsonObject full = ReadJsonRoot("variantsSingleEntry.json");
+            JsonObject entry = full["entry"].AsObject();
             Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entry, null));
         }
 
         [Fact]
         public void GetVariantAliases_ThrowsWhenContentTypeUidEmpty()
         {
-            JObject full = ReadJsonRoot("variantsSingleEntry.json");
-            JObject entry = (JObject)full["entry"];
+            JsonObject full = ReadJsonRoot("variantsSingleEntry.json");
+            JsonObject entry = full["entry"].AsObject();
             Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entry, ""));
         }
 
         [Fact]
         public void GetVariantMetadataTags_WhenEntryNull_ReturnsEmptyArrayString()
         {
-            JObject result = Utils.GetVariantMetadataTags((JObject)null, "landing_page");
+            JsonObject result = Utils.GetVariantMetadataTags((JsonObject)null, "landing_page");
             Assert.True(result["data-csvariants"] != null);
             Assert.Equal("[]", result["data-csvariants"].ToString());
         }
@@ -149,49 +149,49 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void GetVariantAliases_ThrowsWhenUidMissing()
         {
-            var entry = new JObject { ["title"] = "no-uid" };
+            var entry = new JsonObject { ["title"] = "no-uid" };
             Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entry, "movie"));
         }
 
         [Fact]
         public void GetVariantAliases_ThrowsWhenUidNull()
         {
-            var entry = new JObject { ["uid"] = JValue.CreateNull() };
+            var entry = new JsonObject { ["uid"] = JsonNode.Parse("null") };
             Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entry, "movie"));
         }
 
         [Fact]
         public void GetVariantAliases_Batch_ThrowsWhenContentTypeUidNull()
         {
-            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            var entries = new JsonArray { new JsonObject { ["uid"] = "a" } };
             Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entries, null));
         }
 
         [Fact]
         public void GetVariantAliases_Batch_ThrowsWhenContentTypeUidEmpty()
         {
-            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            var entries = new JsonArray { new JsonObject { ["uid"] = "a" } };
             Assert.Throws<ArgumentException>(() => Utils.GetVariantAliases(entries, ""));
         }
 
         [Fact]
         public void GetVariantMetadataTags_WhenEntriesArrayNull_ReturnsEmptyArrayString()
         {
-            JObject result = Utils.GetVariantMetadataTags((JArray)null, "movie");
+            JsonObject result = Utils.GetVariantMetadataTags((JsonArray)null, "movie");
             Assert.Equal("[]", result["data-csvariants"].ToString());
         }
 
         [Fact]
         public void GetVariantMetadataTags_Batch_ThrowsWhenContentTypeUidNull()
         {
-            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            var entries = new JsonArray { new JsonObject { ["uid"] = "a" } };
             Assert.Throws<ArgumentException>(() => Utils.GetVariantMetadataTags(entries, null));
         }
 
         [Fact]
         public void GetVariantMetadataTags_Batch_ThrowsWhenContentTypeUidEmpty()
         {
-            var entries = new JArray { new JObject { ["uid"] = "a" } };
+            var entries = new JsonArray { new JsonObject { ["uid"] = "a" } };
             Assert.Throws<ArgumentException>(() => Utils.GetVariantMetadataTags(entries, ""));
         }
 
@@ -199,85 +199,85 @@ namespace Contentstack.Utils.Tests
         public void GetDataCsvariantsAttribute_DelegatesToGetVariantMetadataTags()
         {
 #pragma warning disable CS0618 // Type or member is obsolete — intentional coverage of backward-compatible alias
-            JObject full = ReadJsonRoot("variantsSingleEntry.json");
-            JObject entry = (JObject)full["entry"];
+            JsonObject full = ReadJsonRoot("variantsSingleEntry.json");
+            JsonObject entry = full["entry"].AsObject();
             const string contentTypeUid = "movie";
 
-            JObject canonical = Utils.GetVariantMetadataTags(entry, contentTypeUid);
-            JObject legacy = Utils.GetDataCsvariantsAttribute(entry, contentTypeUid);
-            Assert.True(JToken.DeepEquals(canonical, legacy));
+            JsonObject canonical = Utils.GetVariantMetadataTags(entry, contentTypeUid);
+            JsonObject legacy = Utils.GetDataCsvariantsAttribute(entry, contentTypeUid);
+            Assert.True(JsonNode.DeepEquals(canonical, legacy));
 
-            JObject fullMulti = ReadJsonRoot("variantsEntries.json");
-            JArray entries = (JArray)fullMulti["entries"];
-            JObject canonicalBatch = Utils.GetVariantMetadataTags(entries, contentTypeUid);
-            JObject legacyBatch = Utils.GetDataCsvariantsAttribute(entries, contentTypeUid);
-            Assert.True(JToken.DeepEquals(canonicalBatch, legacyBatch));
+            JsonObject fullMulti = ReadJsonRoot("variantsEntries.json");
+            JsonArray entries = fullMulti["entries"].AsArray();
+            JsonObject canonicalBatch = Utils.GetVariantMetadataTags(entries, contentTypeUid);
+            JsonObject legacyBatch = Utils.GetDataCsvariantsAttribute(entries, contentTypeUid);
+            Assert.True(JsonNode.DeepEquals(canonicalBatch, legacyBatch));
 
-            JObject nullEntryLegacy = Utils.GetDataCsvariantsAttribute((JObject)null, "x");
-            JObject nullEntryCanonical = Utils.GetVariantMetadataTags((JObject)null, "x");
-            Assert.True(JToken.DeepEquals(nullEntryCanonical, nullEntryLegacy));
+            JsonObject nullEntryLegacy = Utils.GetDataCsvariantsAttribute((JsonObject)null, "x");
+            JsonObject nullEntryCanonical = Utils.GetVariantMetadataTags((JsonObject)null, "x");
+            Assert.True(JsonNode.DeepEquals(nullEntryCanonical, nullEntryLegacy));
 
-            JObject nullArrLegacy = Utils.GetDataCsvariantsAttribute((JArray)null, "x");
-            JObject nullArrCanonical = Utils.GetVariantMetadataTags((JArray)null, "x");
-            Assert.True(JToken.DeepEquals(nullArrCanonical, nullArrLegacy));
+            JsonObject nullArrLegacy = Utils.GetDataCsvariantsAttribute((JsonArray)null, "x");
+            JsonObject nullArrCanonical = Utils.GetVariantMetadataTags((JsonArray)null, "x");
+            Assert.True(JsonNode.DeepEquals(nullArrCanonical, nullArrLegacy));
 #pragma warning restore CS0618
         }
 
         [Fact]
         public void GetVariantAliases_ReturnsEmptyVariantsWhenPublishDetailsMissing()
         {
-            var entry = new JObject { ["uid"] = "blt_no_pd" };
-            JObject result = Utils.GetVariantAliases(entry, "movie");
+            var entry = new JsonObject { ["uid"] = "blt_no_pd" };
+            JsonObject result = Utils.GetVariantAliases(entry, "movie");
             Assert.Equal("blt_no_pd", result["entry_uid"].ToString());
             Assert.Equal("movie", result["contenttype_uid"].ToString());
-            Assert.Empty((JArray)result["variants"]);
+            Assert.Empty(result["variants"].AsArray());
         }
 
         [Fact]
         public void GetVariantAliases_ReturnsEmptyVariantsWhenVariantsObjectEmpty()
         {
-            var entry = new JObject
+            var entry = new JsonObject
             {
                 ["uid"] = "blt_empty_v",
-                ["publish_details"] = new JObject
+                ["publish_details"] = new JsonObject
                 {
-                    ["variants"] = new JObject()
+                    ["variants"] = new JsonObject()
                 }
             };
-            JObject result = Utils.GetVariantAliases(entry, "movie");
-            Assert.Empty((JArray)result["variants"]);
+            JsonObject result = Utils.GetVariantAliases(entry, "movie");
+            Assert.Empty(result["variants"].AsArray());
         }
 
         [Fact]
         public void GetVariantAliases_ReturnsEmptyVariantsWhenVariantsKeyMissing()
         {
-            var entry = new JObject
+            var entry = new JsonObject
             {
                 ["uid"] = "blt_no_variants_key",
-                ["publish_details"] = new JObject { ["time"] = "2025-01-01T00:00:00.000Z" }
+                ["publish_details"] = new JsonObject { ["time"] = "2025-01-01T00:00:00.000Z" }
             };
-            JObject result = Utils.GetVariantAliases(entry, "movie");
-            Assert.Empty((JArray)result["variants"]);
+            JsonObject result = Utils.GetVariantAliases(entry, "movie");
+            Assert.Empty(result["variants"].AsArray());
         }
 
         [Fact]
         public void GetVariantAliases_SkipsVariantWhenAliasMissingOrEmpty()
         {
-            var entry = new JObject
+            var entry = new JsonObject
             {
                 ["uid"] = "blt_skip",
-                ["publish_details"] = new JObject
+                ["publish_details"] = new JsonObject
                 {
-                    ["variants"] = new JObject
+                    ["variants"] = new JsonObject
                     {
-                        ["v1"] = new JObject { ["alias"] = "keep_me" },
-                        ["v2"] = new JObject(),
-                        ["v3"] = new JObject { ["alias"] = "" }
+                        ["v1"] = new JsonObject { ["alias"] = "keep_me" },
+                        ["v2"] = new JsonObject(),
+                        ["v3"] = new JsonObject { ["alias"] = "" }
                     }
                 }
             };
-            JObject result = Utils.GetVariantAliases(entry, "page");
-            var variants = (JArray)result["variants"];
+            JsonObject result = Utils.GetVariantAliases(entry, "page");
+            var variants = result["variants"].AsArray();
             Assert.Single(variants);
             Assert.Equal("keep_me", variants[0].ToString());
         }

@@ -5,6 +5,7 @@ using Contentstack.Utils.Enums;
 using Contentstack.Utils.Tests.Helpers;
 using Contentstack.Utils.Tests.Constants;
 using System;
+using Contentstack.Utils;
 
 namespace Contentstack.Utils.Tests
 {
@@ -178,9 +179,9 @@ namespace Contentstack.Utils.Tests
 
             string result = defaultRender.RenderNode("a", nodeLink, (nodes) => { return text; });
 
-            string url = nodeLink.attrs.ContainsKey("url") ? (string)nodeLink.attrs["url"] : "";
-            string target = nodeLink.attrs.ContainsKey("target") ? (string)nodeLink.attrs["target"] : "";
-            string title = nodeLink.attrs.ContainsKey("title") ? (string)nodeLink.attrs["title"] : "";
+            string url = nodeLink.attrs.ContainsKey("url") ? JsonAttrValue.AsString(nodeLink.attrs["url"]) : "";
+            string target = nodeLink.attrs.ContainsKey("target") ? JsonAttrValue.AsString(nodeLink.attrs["target"]) : "";
+            string title = nodeLink.attrs.ContainsKey("title") ? JsonAttrValue.AsString(nodeLink.attrs["title"]) : "";
 
             Assert.Equal($"<a href=\"{url}\"  target=\"{target}\" title=\"{title}\" >Text To set Link</a>", result);
         }

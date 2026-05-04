@@ -2,33 +2,32 @@
 using Contentstack.Utils.Converters;
 using Contentstack.Utils.Interfaces;
 using Contentstack.Utils.Models;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Contentstack.Utils.Tests.Mocks
 {
-    public class GQLModel<T> where T: IEmbeddedObject
+    public class GQLModel<T> where T : IEmbeddedObject
     {
-        [Newtonsoft.Json.JsonConverter(typeof(RTEJsonConverter))]
         public JsonRTENodes<T> multiplerte { get; set; }
         public JsonRTENode<T> singlerte { get; set; }
     }
 
-    [Newtonsoft.Json.JsonConverter(typeof(RTEJsonConverter))]
+    [JsonConverter(typeof(PathMappedJsonConverter<EntryModel>))]
     public class EntryModel : IEmbeddedEntry
     {
-        [JsonProperty("system.uid")]
+        [JsonPropertyName("system.uid")]
         public string Uid
         {
             get;
             set;
         }
-        [JsonProperty("system.content_type_uid")]
+        [JsonPropertyName("system.content_type_uid")]
         public string ContentTypeUid
         {
             get;
             set;
         }
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title
         {
             get;
@@ -36,34 +35,34 @@ namespace Contentstack.Utils.Tests.Mocks
         }
     }
 
-    [Newtonsoft.Json.JsonConverter(typeof(RTEJsonConverter))]
+    [JsonConverter(typeof(PathMappedJsonConverter<AssetModel>))]
     public class AssetModel : IEmbeddedAsset
     {
-        [JsonProperty("system.uid")]
+        [JsonPropertyName("system.uid")]
         public string Uid
         {
             get;
             set;
         }
-        [JsonProperty("system.content_type_uid")]
+        [JsonPropertyName("system.content_type_uid")]
         public string ContentTypeUid
         {
             get;
             set;
         }
-        [JsonProperty("title")]
+        [JsonPropertyName("title")]
         public string Title
         {
             get;
             set;
         }
-        [JsonProperty("filename")]
+        [JsonPropertyName("filename")]
         public string FileName
         {
             get;
             set;
         }
-        [JsonProperty("url")]
+        [JsonPropertyName("url")]
         public string Url
         {
             get;
@@ -71,4 +70,3 @@ namespace Contentstack.Utils.Tests.Mocks
         }
     }
 }
-
