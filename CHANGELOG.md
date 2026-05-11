@@ -1,4 +1,13 @@
-### Version: 1.2.0
+### Version: 1.3.0
+
+#### Date: May-11-2026
+- Added Live Preview editable tags support through `addEditableTags` and `addTags`.
+- Added variant-aware CSLP tag generation using `_applied_variants` / `system.applied_variants`.
+- Added nested fields, arrays, references, and null-safe editable tag generation.
+- Added configurable locale casing through `AddEditableTagsOptions.UseLowerCaseLocale`.
+- Added unit tests for Live Preview editable tags.
+
+
 #### Date: March-31-2026
 - Added `GetVariantMetadataTags(JObject, string)` and `GetVariantMetadataTags(JArray, string)` as the canonical API for building the `data-csvariants` payload (same behavior as the previous helpers).
 
