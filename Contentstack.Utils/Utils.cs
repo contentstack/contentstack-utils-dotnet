@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Contentstack.Utils.Models;
 using HtmlAgilityPack;
 using Contentstack.Utils.Extensions;
 using Contentstack.Utils.Interfaces;
-using System;
 using Contentstack.Utils.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -200,69 +201,482 @@ namespace Contentstack.Utils
             return null;
         }
 
-        public static void addEditableTags(EditableEntry entry, string contentTypeUid, bool tagsAsObject, string locale = "en-us")
+        /// <summary>
+        /// Adds Live Preview editable tags to an entry for CMS editing capability.
+        /// This is the main public API method with enhanced options support.
+        /// </summary>
+        /// <param name="entry">The entry to add tags to</param>
+        /// <param name="contentTypeUid">Content type UID (will be lowercased)</param>
+        /// <param name="tagsAsObject">Whether to return tags as objects or strings</param>
+        /// <param name="locale">Locale for the entry (default: "en-us")</param>
+        /// <param name="options">Options controlling tag generation behavior</param>
+        public static void addEditableTags(EditableEntry entry, string contentTypeUid, bool tagsAsObject, string locale = "en-us", AddEditableTagsOptions options = null)
         {
-            if (entry != null)
-                entry["$"] = GetTag(entry, $"{contentTypeUid}.{entry.Uid}.{locale}", tagsAsObject, locale);
+            if (entry == null) return;
+
+            // Apply default options if not provided
+            options = options ?? new AddEditableTagsOptions();
+
+            // Normalize inputs according to JavaScript SDK behavior
+            contentTypeUid = contentTypeUid?.ToLowerInvariant() ?? "";
+            locale = options.UseLowerCaseLocale ? (locale?.ToLowerInvariant() ?? "en-us") : (locale ?? "en-us");
+
+            // Extract applied variants from entry
+            var appliedVariants = ExtractAppliedVariants(entry);
+
+            // Generate tags and assign to entry
+            entry["$"] = GetTag(entry, $"{contentTypeUid}.{entry.Uid}.{locale}", tagsAsObject, locale, appliedVariants);
         }
 
-        private static Dictionary<string, object> GetTag(object content, string prefix, bool tagsAsObject, string locale)
+
+        /// <summary>
+        /// Alias for addEditableTags to match JavaScript SDK naming.
+        /// </summary>
+        public static void addTags(EditableEntry entry, string contentTypeUid, bool tagsAsObject, string locale = "en-us", AddEditableTagsOptions options = null)
         {
+            addEditableTags(entry, contentTypeUid, tagsAsObject, locale, options);
+        }
+
+        /// <summary>
+        /// Enhanced GetTag method with comprehensive variant support and proper null handling.
+        /// </summary>
+        private static Dictionary<string, object> GetTag(object content, string prefix, bool tagsAsObject, string locale, AppliedVariants appliedVariants)
+        {
+            // Null safety - return empty tags if content is null or undefined
+            if (content == null) return new Dictionary<string, object>();
+
             var tags = new Dictionary<string, object>();
-            foreach (var property in (Dictionary<string, object>)content)
+            
+            // Handle Dictionary<string, object> directly
+            if (content is Dictionary<string, object> contentDict)
             {
-                var key = property.Key;
-                var value = property.Value;
-
-                if (key == "$")
-                    continue;
-                    
-                switch (value)
+                foreach (var property in contentDict)
                 {
-                    case object obj when obj is object[] array:
-                        for (int index = 0; index < array.Length; index++)
-                        {
-                            object objValue = array[index]; 
-                            string childKey = $"{key}__{index}";
-                            string parentKey = $"{key}__parent";
-
-                            tags[childKey] = GetTagsValue($"{prefix}.{key}.{index}", tagsAsObject);
-                            tags[parentKey] = GetParentTagsValue($"{prefix}.{key}", tagsAsObject);
-
-                            if (objValue != null &&
-                                objValue.GetType().GetProperty("_content_type_uid") != null &&
-                                objValue.GetType().GetProperty("Uid") != null)
-                            {
-                                var typedObj = (EditableEntry)objValue;
-                                string locale_ = Convert.ToString(typedObj.GetType().GetProperty("locale").GetValue(typedObj));
-                                string ctUid = Convert.ToString(typedObj.GetType().GetProperty("_content_type_uid").GetValue(typedObj));
-                                string uid = Convert.ToString(typedObj.GetType().GetProperty("uid").GetValue(typedObj));
-                                string localeStr = "";
-                                if (locale_ != null)
-                                {
-                                    localeStr = locale_;
-                                } else
-                                {
-                                    localeStr = locale;
-                                }
-                                typedObj["$"] = GetTag(typedObj, $"{ctUid}.{uid}.{localeStr}", tagsAsObject, locale);
-                            }
-                            else if (value is object)
-                            {
-                                ((EditableEntry)value)["$"] = GetTag(value, $"{prefix}.{key}.{index}", tagsAsObject, locale);
-                            }
-                        }
-                        tags[key] = GetTagsValue($"{prefix}.{key}", tagsAsObject);
-                        break;
-                    case object obj when obj != null:
-                        if (value != null)
-                        {
-                            ((EditableEntry)value)["$"] = GetTag(value, $"{prefix}.{key}", tagsAsObject, locale);
-                        }
-                        break;
+                    ProcessContentProperty(property.Key, property.Value, prefix, tagsAsObject, locale, appliedVariants, tags);
                 }
             }
+            // Handle EditableEntry interface
+            else if (content is EditableEntry editableEntry)
+            {
+                // For EditableEntry, we need to get the underlying data
+                // Use reflection or casting to get the data
+                try
+                {
+                    // Try to get the underlying dictionary if it's our mock class
+                    var getDataMethod = content.GetType().GetMethod("GetData");
+                    if (getDataMethod != null)
+                    {
+                        var data = (Dictionary<string, object>)getDataMethod.Invoke(content, null);
+                        foreach (var property in data)
+                        {
+                            ProcessContentProperty(property.Key, property.Value, prefix, tagsAsObject, locale, appliedVariants, tags);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: try to cast to dictionary
+                        var dict = (Dictionary<string, object>)content;
+                        foreach (var property in dict)
+                        {
+                            ProcessContentProperty(property.Key, property.Value, prefix, tagsAsObject, locale, appliedVariants, tags);
+                        }
+                    }
+                }
+                catch
+                {
+                    // If all else fails, return empty tags
+                    return tags;
+                }
+            }
+
             return tags;
+        }
+
+        /// <summary>
+        /// Processes a single content property for tag generation.
+        /// </summary>
+        private static void ProcessContentProperty(string key, object value, string prefix, bool tagsAsObject, 
+            string locale, AppliedVariants appliedVariants, Dictionary<string, object> tags)
+        {
+            // Skip the $ key to avoid recursive processing
+            if (key == "$") return;
+
+            // Extract metadata UID for variant path building
+            string metaUID = ExtractMetadataUid(value);
+            
+            // Build updated meta key for variant processing
+            string updatedMetakey = BuildUpdatedMetaKey(appliedVariants, key, metaUID);
+
+            // Process based on value type
+            if (IsArrayType(value))
+            {
+                ProcessArrayField(value, key, prefix, tagsAsObject, locale, appliedVariants, updatedMetakey, tags);
+            }
+            else if (value != null)
+            {
+                ProcessObjectField(value, key, prefix, tagsAsObject, locale, appliedVariants, updatedMetakey, tags);
+            }
+
+            // Always emit a tag for the field itself (even if value is null)
+            var fieldPath = $"{prefix}.{key}";
+            var fieldVariants = new AppliedVariants(appliedVariants._applied_variants, updatedMetakey);
+            tags[key] = GetTagsValue(ApplyVariantToDataValue(fieldPath, fieldVariants), tagsAsObject);
+        }
+
+        /// <summary>
+        /// Legacy GetTag overload for backward compatibility.
+        /// </summary>
+        private static Dictionary<string, object> GetTag(object content, string prefix, bool tagsAsObject, string locale)
+        {
+            var emptyVariants = new AppliedVariants();
+            return GetTag(content, prefix, tagsAsObject, locale, emptyVariants);
+        }
+
+        /// <summary>
+        /// Extracts applied variants from an entry, checking both _applied_variants and system.applied_variants.
+        /// </summary>
+        private static AppliedVariants ExtractAppliedVariants(EditableEntry entry)
+        {
+            Dictionary<string, string> variants = null;
+
+            // Try to get _applied_variants first (direct property)
+            if (entry.ContainsKey("_applied_variants") && entry["_applied_variants"] != null)
+            {
+                variants = ConvertToStringDictionary(entry["_applied_variants"]);
+            }
+            // Fallback to system.applied_variants
+            else if (entry.ContainsKey("system") && entry["system"] != null)
+            {
+                try
+                {
+                    var system = (Dictionary<string, object>)entry["system"];
+                    if (system.ContainsKey("applied_variants") && system["applied_variants"] != null)
+                    {
+                        variants = ConvertToStringDictionary(system["applied_variants"]);
+                    }
+                }
+                catch { /* Ignore conversion errors */ }
+            }
+
+            return new AppliedVariants(variants);
+        }
+
+        /// <summary>
+        /// Safely converts an object to a string dictionary for variant processing.
+        /// </summary>
+        private static Dictionary<string, string> ConvertToStringDictionary(object obj)
+        {
+            try
+            {
+                if (obj is Dictionary<string, object> dict)
+                {
+                    var result = new Dictionary<string, string>();
+                    foreach (var kvp in dict)
+                    {
+                        if (kvp.Value != null)
+                        {
+                            result[kvp.Key] = kvp.Value.ToString();
+                        }
+                    }
+                    return result;
+                }
+                else if (obj is Dictionary<string, string> strDict)
+                {
+                    return new Dictionary<string, string>(strDict);
+                }
+            }
+            catch { /* Ignore conversion errors */ }
+
+            return new Dictionary<string, string>();
+        }
+
+        /// <summary>
+        /// Checks if a value is an array type that needs array processing.
+        /// </summary>
+        private static bool IsArrayType(object value)
+        {
+            return value is object[] || 
+                   value is List<object> || 
+                   value is IEnumerable<object>;
+        }
+
+        /// <summary>
+        /// Extracts metadata UID from a value object for variant path building.
+        /// </summary>
+        private static string ExtractMetadataUid(object value)
+        {
+            try
+            {
+                if (value is Dictionary<string, object> dict &&
+                    dict.ContainsKey("_metadata") && 
+                    dict["_metadata"] is Dictionary<string, object> metadata &&
+                    metadata.ContainsKey("uid"))
+                {
+                    return metadata["uid"]?.ToString();
+                }
+            }
+            catch { /* Ignore extraction errors */ }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Builds the updated meta key for variant processing, including metadata UID when applicable.
+        /// </summary>
+        private static string BuildUpdatedMetaKey(AppliedVariants appliedVariants, string key, string metaUID)
+        {
+            var metaKeyPrefix = string.IsNullOrEmpty(appliedVariants.metaKey) ? "" : appliedVariants.metaKey + ".";
+            var baseMetaKey = metaKeyPrefix + key;
+            
+            // Append metadata UID if variants are applied and metaUID exists
+            if (appliedVariants.shouldApplyVariant && !string.IsNullOrEmpty(metaUID) && !string.IsNullOrEmpty(baseMetaKey))
+            {
+                return baseMetaKey + "." + metaUID;
+            }
+            
+            return baseMetaKey;
+        }
+
+        /// <summary>
+        /// Processes array fields with proper null handling, reference detection, and variant support.
+        /// </summary>
+        private static void ProcessArrayField(object value, string key, string prefix, bool tagsAsObject, 
+            string locale, AppliedVariants appliedVariants, string updatedMetakey, Dictionary<string, object> tags)
+        {
+            // Convert to object array for processing
+            object[] array;
+            try
+            {
+                if (value is object[] objArray)
+                    array = objArray;
+                else if (value is List<object> list)
+                    array = list.ToArray();
+                else
+                    return; // Cannot process this array type
+            }
+            catch
+            {
+                return; // Conversion failed
+            }
+
+            // Process each array element
+            for (int index = 0; index < array.Length; index++)
+            {
+                object objValue = array[index];
+                
+                // Skip null and undefined elements (matching JavaScript SDK behavior)
+                if (objValue == null) continue;
+
+                string childKey = $"{key}__{index}";
+                string parentKey = $"{key}__parent";
+
+                // Generate field__index and field__parent tags
+                var indexPath = $"{prefix}.{key}.{index}";
+                var parentPath = $"{prefix}.{key}";
+                
+                var indexVariants = new AppliedVariants(appliedVariants._applied_variants, updatedMetakey);
+                var parentVariants = new AppliedVariants(appliedVariants._applied_variants, appliedVariants.metaKey + (string.IsNullOrEmpty(appliedVariants.metaKey) ? "" : ".") + key);
+
+                tags[childKey] = GetTagsValue(ApplyVariantToDataValue(indexPath, indexVariants), tagsAsObject);
+                tags[parentKey] = GetParentTagsValue(ApplyVariantToDataValue(parentPath, parentVariants), tagsAsObject);
+
+                // Handle reference entries vs regular objects
+                if (IsReferenceEntry(objValue))
+                {
+                    ProcessReferenceEntry(objValue, tagsAsObject, locale);
+                }
+                else if (objValue is Dictionary<string, object>)
+                {
+                    var elementVariants = new AppliedVariants(appliedVariants._applied_variants, updatedMetakey);
+                    ((Dictionary<string, object>)objValue)["$"] = GetTag(objValue, indexPath, tagsAsObject, locale, elementVariants);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Processes object fields with variant support.
+        /// </summary>
+        private static void ProcessObjectField(object value, string key, string prefix, bool tagsAsObject,
+            string locale, AppliedVariants appliedVariants, string updatedMetakey, Dictionary<string, object> tags)
+        {
+            try
+            {
+                if (value is Dictionary<string, object> dict)
+                {
+                    var fieldVariants = new AppliedVariants(appliedVariants._applied_variants, updatedMetakey);
+                    dict["$"] = GetTag(value, $"{prefix}.{key}", tagsAsObject, locale, fieldVariants);
+                }
+            }
+            catch { /* Ignore processing errors for malformed objects */ }
+        }
+
+        /// <summary>
+        /// Checks if an object is a reference entry (has both _content_type_uid and uid properties).
+        /// </summary>
+        private static bool IsReferenceEntry(object obj)
+        {
+            try
+            {
+                if (obj is Dictionary<string, object> dict)
+                {
+                    return dict.ContainsKey("_content_type_uid") && 
+                           dict.ContainsKey("uid") &&
+                           dict["_content_type_uid"] != null && 
+                           dict["uid"] != null;
+                }
+            }
+            catch { }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Processes reference entries with independent variant handling.
+        /// </summary>
+        private static void ProcessReferenceEntry(object referenceObj, bool tagsAsObject, string parentLocale)
+        {
+            try
+            {
+                var refDict = (Dictionary<string, object>)referenceObj;
+                
+                // Extract reference properties
+                string refContentTypeUid = refDict["_content_type_uid"]?.ToString();
+                string refUid = refDict["uid"]?.ToString();
+                string refLocale = refDict.ContainsKey("locale") ? refDict["locale"]?.ToString() : null;
+                
+                if (string.IsNullOrEmpty(refContentTypeUid) || string.IsNullOrEmpty(refUid))
+                    return;
+
+                // Use reference locale or fallback to parent locale
+                string effectiveLocale = !string.IsNullOrEmpty(refLocale) ? refLocale : parentLocale;
+                
+                // Extract reference-specific variants (do not inherit parent variants)
+                var refVariants = ExtractAppliedVariantsFromObject(refDict);
+                
+                // Generate tags for reference using its own content type, UID, and locale
+                string refPrefix = $"{refContentTypeUid.ToLowerInvariant()}.{refUid}.{effectiveLocale.ToLowerInvariant()}";
+                refDict["$"] = GetTag(referenceObj, refPrefix, tagsAsObject, effectiveLocale, refVariants);
+            }
+            catch { /* Ignore processing errors for malformed references */ }
+        }
+
+        /// <summary>
+        /// Extracts applied variants from a generic object (used for reference entries).
+        /// </summary>
+        private static AppliedVariants ExtractAppliedVariantsFromObject(Dictionary<string, object> obj)
+        {
+            Dictionary<string, string> variants = null;
+
+            // Try _applied_variants first
+            if (obj.ContainsKey("_applied_variants") && obj["_applied_variants"] != null)
+            {
+                variants = ConvertToStringDictionary(obj["_applied_variants"]);
+            }
+            // Fallback to system.applied_variants
+            else if (obj.ContainsKey("system") && obj["system"] is Dictionary<string, object> system)
+            {
+                if (system.ContainsKey("applied_variants") && system["applied_variants"] != null)
+                {
+                    variants = ConvertToStringDictionary(system["applied_variants"]);
+                }
+            }
+
+            return new AppliedVariants(variants);
+        }
+
+        /// <summary>
+        /// Applies variant processing to a data value, adding v2: prefix and variant suffix when applicable.
+        /// </summary>
+        private static string ApplyVariantToDataValue(string dataValue, AppliedVariants appliedVariants)
+        {
+            if (!appliedVariants.shouldApplyVariant || appliedVariants._applied_variants == null)
+            {
+                return dataValue;
+            }
+
+            string variant = null;
+
+            // Check for direct field match
+            if (appliedVariants._applied_variants.ContainsKey(appliedVariants.metaKey))
+            {
+                variant = appliedVariants._applied_variants[appliedVariants.metaKey];
+            }
+            else
+            {
+                // Find parent variantised path
+                string parentPath = GetParentVariantisedPath(appliedVariants);
+                if (!string.IsNullOrEmpty(parentPath))
+                {
+                    variant = appliedVariants._applied_variants[parentPath];
+                }
+            }
+
+            if (string.IsNullOrEmpty(variant))
+            {
+                return dataValue;
+            }
+
+            // Apply v2: prefix and variant suffix to UID segment
+            try
+            {
+                var segments = ("v2:" + dataValue).Split('.');
+                if (segments.Length >= 2)
+                {
+                    // Modify the UID segment (index 1 after v2: prefix)
+                    segments[1] = segments[1] + "_" + variant;
+                    return string.Join(".", segments);
+                }
+            }
+            catch { }
+
+            return dataValue;
+        }
+
+        /// <summary>
+        /// Finds the longest matching parent path for variant inheritance.
+        /// </summary>
+        private static string GetParentVariantisedPath(AppliedVariants appliedVariants)
+        {
+            try
+            {
+                if (appliedVariants._applied_variants == null || string.IsNullOrEmpty(appliedVariants.metaKey))
+                {
+                    return "";
+                }
+
+                var childPathFragments = appliedVariants.metaKey.Split('.');
+                
+                // Sort keys by length descending for longest match preference
+                var sortedKeys = new List<string>(appliedVariants._applied_variants.Keys);
+                sortedKeys.Sort((a, b) => b.Length.CompareTo(a.Length));
+
+                foreach (var path in sortedKeys)
+                {
+                    var parentFragments = path.Split('.');
+                    
+                    // Check if this path is a parent of the current meta key
+                    if (parentFragments.Length <= childPathFragments.Length)
+                    {
+                        bool isParent = true;
+                        for (int i = 0; i < parentFragments.Length; i++)
+                        {
+                            if (parentFragments[i] != childPathFragments[i])
+                            {
+                                isParent = false;
+                                break;
+                            }
+                        }
+                        
+                        if (isParent)
+                        {
+                            return path;
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return "";
         }
 
         private static object GetTagsValue(string dataValue, bool tagsAsObject)
