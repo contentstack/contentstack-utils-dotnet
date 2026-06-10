@@ -22,3 +22,4 @@ packages/
 */TestResults/
 */app.config
 .dccache
+*/Assets/regions.json

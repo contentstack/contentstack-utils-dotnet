@@ -5,6 +5,12 @@
 - JSON serialization uses the same model attributes with `System.Text.Json.Serialization` (`JsonPropertyName`, `JsonConverter`), including custom converters for RTE/GQL-shaped JSON and **path-mapped** embedded models (`PathMappedJsonConverter<T>`).
 - RTE JSON deserialization tolerates **trailing commas** when using the documented test/helper patterns (`AllowTrailingCommas`); attribute dictionaries may surface **`JsonElement`** values instead of boxed strings—use helpers or unwrap explicitly if you access `Node.attrs` directly.
 - Internal: `LangVersion` set to **latest** for multi-target builds; utilities normalize attribute values where the HTML pipeline expects strings.
+- **New:** Multi-region endpoint resolution via `Endpoint.GetContentstackEndpoint(region, service)` — resolves Contentstack service URLs for all 7 supported regions (NA, EU, AU, Azure-NA, Azure-EU, GCP-NA, GCP-EU) and 18 service keys (contentDelivery, contentManagement, auth, graphqlDelivery, preview, images, assets, automate, launch, developerHub, brandKit, genAI, personalizeManagement, personalizeEdge, composableStudio, assetManagement, and more).
+- **New:** `Utils.GetContentstackEndpoint(region, service)` proxy — access endpoint resolution directly from the `Utils` class without importing `Contentstack.Utils.Endpoints`.
+- **New:** `omitHttps` flag strips the `https://` scheme from returned URLs — pass directly to SDK host configuration (e.g. `new ContentstackOptions { Host = Endpoint.GetContentstackEndpoint("eu", "contentDelivery", omitHttps: true) }`).
+- **New:** Case-insensitive region alias support — `"us"`, `"NA"`, `"AWS-NA"`, `"azure_na"` all resolve correctly to the same region.
+- **New:** `regions.json` registry auto-downloaded from `artifacts.contentstack.com` on first use and cached on disk — no setup required. The SDK self-heals if the file is missing.
+- **New:** `Scripts/refresh-region.cs` bundled inside the NuGet package — automatically placed in your project's `Scripts/` folder on first `dotnet build`. Run `dotnet run Scripts/refresh-region.cs` anytime to pull the latest regions from CDN.
 
 ### Version: 2.0.0-beta.1
 #### Date: April-27-2026
