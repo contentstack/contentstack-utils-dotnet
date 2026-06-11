@@ -228,7 +228,7 @@ namespace Contentstack.Utils.Tests
         }
 
         // ------------------------------------------------------------------
-        // Local file self-heal (mirrors Python _download_and_save behaviour)
+        // Local file self-heal.
         // ------------------------------------------------------------------
 
         [Fact]
