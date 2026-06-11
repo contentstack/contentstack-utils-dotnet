@@ -434,5 +434,19 @@ namespace Contentstack.Utils
             }
             return variantArray;
         }
+
+        /// <summary>
+        /// Resolves a single Contentstack service endpoint URL for the given region.
+        /// Proxy for <see cref="Endpoints.Endpoint.GetContentstackEndpoint(string, string, bool)"/>.
+        /// </summary>
+        public static string GetContentstackEndpoint(string region, string service, bool omitHttps = false)
+            => Endpoints.Endpoint.GetContentstackEndpoint(region, service, omitHttps);
+
+        /// <summary>
+        /// Returns all service endpoint URLs for the given region.
+        /// Proxy for <see cref="Endpoints.Endpoint.GetContentstackEndpoint(string, bool)"/>.
+        /// </summary>
+        public static Dictionary<string, string> GetContentstackEndpoint(string region, bool omitHttps = false)
+            => Endpoints.Endpoint.GetContentstackEndpoint(region, omitHttps);
     }
 }
