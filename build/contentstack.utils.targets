@@ -1,7 +1,12 @@
 <Project>
+  <!--
+    Copies refresh-region.cs into the consuming project's Scripts/ folder
+    on first build. Customer then runs:
+      dotnet run Scripts/refresh-region.cs
+  -->
   <PropertyGroup>
-    <_RefreshScriptDest>$(MSBuildProjectDirectory)/Scripts/refresh-region.py</_RefreshScriptDest>
-    <_RefreshScriptSrc>$(MSBuildThisFileDirectory)../contentFiles/cs/any/Scripts/refresh-region.py</_RefreshScriptSrc>
+    <_RefreshScriptDest>$(MSBuildProjectDirectory)/Scripts/refresh-region.cs</_RefreshScriptDest>
+    <_RefreshScriptSrc>$(MSBuildThisFileDirectory)../contentFiles/cs/any/Scripts/refresh-region.cs</_RefreshScriptSrc>
   </PropertyGroup>
 
   <Target Name="ContentstackUtils_PlaceRefreshScript"
@@ -9,6 +14,6 @@
           Condition="!Exists('$(_RefreshScriptDest)')">
     <MakeDir Directories="$(MSBuildProjectDirectory)/Scripts" />
     <Copy SourceFiles="$(_RefreshScriptSrc)" DestinationFiles="$(_RefreshScriptDest)" />
-    <Message Text="contentstack.utils: Scripts/refresh-region.py added to your project. Run 'python3 Scripts/refresh-region.py' to refresh regions." Importance="High" />
+    <Message Text="contentstack.utils: Scripts/refresh-region.cs added to your project. Run 'dotnet run Scripts/refresh-region.cs' to refresh regions." Importance="High" />
   </Target>
 </Project>
