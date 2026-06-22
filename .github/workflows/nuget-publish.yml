@@ -22,9 +22,7 @@ jobs:
           dotnet pack -c Release -o out
 
       - name: Push generated package to NuGet.org
-        run: |
-          cd out
-          dotnet nuget push "contentstack.utils.*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate --no-symbols --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "out/contentstack.utils.*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate --no-symbols --source https://api.nuget.org/v3/index.json
 
   publish-git:
     runs-on: windows-latest
@@ -46,6 +44,4 @@ jobs:
           dotnet pack -c Release -o out
 
       - name: Push generated package to GitHub Packages
-        run: |
-          cd out
-          dotnet nuget push "contentstack.utils.*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols --source https://nuget.pkg.github.com/Contentstack/index.json
+        run: dotnet nuget push "out/contentstack.utils.*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols --source https://nuget.pkg.github.com/Contentstack/index.json
