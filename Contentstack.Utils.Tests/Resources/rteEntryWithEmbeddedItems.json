@@ -1,0 +1,134 @@
+{
+  "entry": {
+    "uid": "blt17238fbf182d9cdb",
+    "_content_type_uid": "rte_json_comp",
+    "title": "Test RTE with Embedded Author",
+    "locale": "en-us",
+    "_version": 2,
+    "created_at": "2026-06-24T07:00:00.000Z",
+    "updated_at": "2026-06-24T08:00:00.000Z",
+    "author_name": "Grand & Toy Test",
+    "category": "SDK Testing",
+    "rte_json": {
+      "type": "doc",
+      "children": [
+        {
+          "type": "p",
+          "children": [
+            { "text": "Featured author: " },
+            {
+              "type": "reference",
+              "attrs": {
+                "type": "entry",
+                "entry-uid": "blt05dca76dadb9455e",
+                "content-type-uid": "author",
+                "locale": "en-us",
+                "display-type": "inline"
+              },
+              "children": [{ "text": "" }]
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "children": [{ "text": "Team photo below:" }]
+        },
+        {
+          "type": "reference",
+          "attrs": {
+            "type": "asset",
+            "asset-uid": "blt61fc86ad844f4793",
+            "content-type-uid": "sys_assets",
+            "display-type": "display"
+          },
+          "children": [{ "text": "" }]
+        },
+        {
+          "type": "reference",
+          "attrs": {
+            "type": "asset",
+            "asset-uid": "bltd80ed7f6d9d742ca",
+            "content-type-uid": "sys_assets",
+            "display-type": "display"
+          },
+          "children": [{ "text": "" }]
+        }
+      ]
+    },
+    "_embedded_items": {
+      "rte_json": [
+        {
+          "uid": "blt05dca76dadb9455e",
+          "_content_type_uid": "author",
+          "title": "John Smith",
+          "locale": "en-us",
+          "_version": 3,
+          "bio": "Senior software engineer with 12 years of experience in distributed systems.",
+          "email": "john.smith@example.com",
+          "avatar_url": "https://cdn.example.com/authors/john-smith.jpg",
+          "social": {
+            "twitter": "@johnsmith",
+            "linkedin": "linkedin.com/in/johnsmith"
+          },
+          "tags": ["engineering", "distributed-systems", "dotnet"],
+          "publish_details": {
+            "environment": "development",
+            "locale": "en-us",
+            "time": "2026-06-20T14:32:00.000Z",
+            "user": "bltuser123"
+          }
+        },
+        {
+          "uid": "blt61fc86ad844f4793",
+          "_content_type_uid": "sys_assets",
+          "title": "Team Photo 2026",
+          "filename": "team-photo-2026.jpg",
+          "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/blt61fc86ad844f4793/team-photo-2026.jpg",
+          "content_type": "image/jpeg",
+          "file_size": "284521",
+          "locale": "en-us",
+          "is_dir": false,
+          "tags": ["team", "photo", "2026"],
+          "dimension": {
+            "height": 1080,
+            "width": 1920
+          },
+          "publish_details": {
+            "environment": "development",
+            "locale": "en-us",
+            "time": "2026-06-15T10:00:00.000Z",
+            "user": "bltuser123"
+          }
+        },
+        {
+          "uid": "bltd80ed7f6d9d742ca",
+          "_content_type_uid": "sys_assets",
+          "title": "Product Screenshot",
+          "filename": "screenshot-2026-06-04.png",
+          "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/bltd80ed7f6d9d742ca/screenshot-2026-06-04.png",
+          "content_type": "image/png",
+          "file_size": "95340",
+          "locale": "en-us",
+          "is_dir": false,
+          "tags": ["screenshot", "product"],
+          "dimension": {
+            "height": 900,
+            "width": 1440
+          },
+          "publish_details": {
+            "environment": "development",
+            "locale": "en-us",
+            "time": "2026-06-10T08:00:00.000Z",
+            "user": "bltuser456"
+          }
+        }
+      ]
+    },
+    "publish_details": {
+      "environment": "development",
+      "locale": "en-us",
+      "time": "2026-06-24T08:00:00.000Z",
+      "user": "bltuser123"
+    }
+  }
+}
