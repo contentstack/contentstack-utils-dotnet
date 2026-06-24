@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Contentstack.Utils.Converters;
 using Contentstack.Utils.Interfaces;
 using Contentstack.Utils.Models;
@@ -13,37 +14,26 @@ namespace Contentstack.Utils.Tests
     {
         private readonly EmbeddedObjectConverter _converter = new EmbeddedObjectConverter();
 
-        // ── JSON fixtures ─────────────────────────────────────────────────────
+        // ── JSON file loader (mirrors VariantAliasesTest pattern) ─────────────
 
-        private const string EntryJson = @"{
-            ""uid"": ""blt123"",
-            ""_content_type_uid"": ""author"",
-            ""title"": ""John Smith"",
-            ""bio"": ""Senior engineer"",
-            ""email"": ""john@example.com""
-        }";
+        private static string ReadJson(string fileName)
+        {
+            var path = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
+            return File.ReadAllText(path);
+        }
 
-        private const string AssetJson = @"{
-            ""uid"": ""bltasset456"",
-            ""_content_type_uid"": ""sys_assets"",
-            ""filename"": ""photo.jpg"",
-            ""url"": ""https://cdn.example.com/photo.jpg""
-        }";
+        private static JsonSerializerSettings SettingsWithConverter()
+        {
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new EmbeddedObjectConverter());
+            return settings;
+        }
 
-        private const string EmbeddedItemsJson = @"[
-            {
-                ""uid"": ""blt111"",
-                ""_content_type_uid"": ""author"",
-                ""title"": ""Alice"",
-                ""bio"": ""Tech lead""
-            },
-            {
-                ""uid"": ""blt222"",
-                ""_content_type_uid"": ""sys_assets"",
-                ""filename"": ""logo.png"",
-                ""url"": ""https://cdn.example.com/logo.png""
-            }
-        ]";
+        private static EmbeddedObject DeserializeSingle(string json)
+        {
+            return (EmbeddedObject)JsonConvert.DeserializeObject<IEmbeddedObject>(
+                json, SettingsWithConverter());
+        }
 
         // ── EmbeddedObjectConverter.CanConvert ────────────────────────────────
 
@@ -69,7 +59,7 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void CanConvert_EmbeddedObject_ReturnsFalse()
         {
-            // Concrete class must fall through to Newtonsoft default mapping.
+            // Concrete class must fall through to Newtonsoft default property mapping.
             Assert.False(_converter.CanConvert(typeof(EmbeddedObject)));
         }
 
@@ -95,97 +85,147 @@ namespace Contentstack.Utils.Tests
                 _converter.WriteJson(null, new EmbeddedObject(), new JsonSerializer()));
         }
 
-        // ── EmbeddedObjectConverter.ReadJson ─────────────────────────────────
+        // ── ReadJson — null token ─────────────────────────────────────────────
 
         [Fact]
         public void ReadJson_NullToken_ReturnsNull()
         {
-            var settings = SettingsWithConverter();
-            var result = JsonConvert.DeserializeObject<IEmbeddedObject>("null", settings);
+            var result = JsonConvert.DeserializeObject<IEmbeddedObject>("null", SettingsWithConverter());
             Assert.Null(result);
         }
 
+        // ── ReadJson — single embedded entry (embeddedEntry.json) ────────────
+
         [Fact]
-        public void ReadJson_ValidEntryJson_ReturnsEmbeddedObject()
+        public void ReadJson_EntryJson_ReturnsEmbeddedObject()
         {
-            var settings = SettingsWithConverter();
-            var result = JsonConvert.DeserializeObject<IEmbeddedObject>(EntryJson, settings);
+            var result = JsonConvert.DeserializeObject<IEmbeddedObject>(
+                ReadJson("embeddedEntry.json"), SettingsWithConverter());
             Assert.NotNull(result);
             Assert.IsType<EmbeddedObject>(result);
         }
 
         [Fact]
-        public void ReadJson_PopulatesUid()
+        public void ReadJson_EntryJson_PopulatesUid()
         {
-            var result = DeserializeEntry(EntryJson);
-            Assert.Equal("blt123", result.Uid);
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
+            Assert.Equal("blt05dca76dadb9455e", result.Uid);
         }
 
         [Fact]
-        public void ReadJson_PopulatesContentTypeUid()
+        public void ReadJson_EntryJson_PopulatesContentTypeUid()
         {
-            var result = DeserializeEntry(EntryJson);
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
             Assert.Equal("author", result.ContentTypeUid);
         }
 
         [Fact]
-        public void ReadJson_PopulatesTitle_ViaIEmbeddedEntry()
+        public void ReadJson_EntryJson_PopulatesTitle_ViaIEmbeddedEntry()
         {
-            var result = DeserializeEntry(EntryJson);
-            var asEntry = result as IEmbeddedEntry;
-            Assert.NotNull(asEntry);
-            Assert.Equal("John Smith", asEntry.Title);
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
+            Assert.Equal("John Smith", (result as IEmbeddedEntry)?.Title);
         }
 
         [Fact]
-        public void ReadJson_PopulatesFileName_ViaIEmbeddedAsset()
+        public void ReadJson_EntryJson_CustomFields_CapturedInFields()
         {
-            var result = DeserializeEntry(AssetJson);
-            var asAsset = result as IEmbeddedAsset;
-            Assert.NotNull(asAsset);
-            Assert.Equal("photo.jpg", asAsset.FileName);
-            Assert.Equal("https://cdn.example.com/photo.jpg", asAsset.Url);
-        }
-
-        [Fact]
-        public void ReadJson_CustomFields_CapturedViaExtensionData()
-        {
-            // bio and email are not declared on EmbeddedObject — they must land in Fields.
-            var result = DeserializeEntry(EntryJson);
-            Assert.NotNull(result.Fields);
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
             Assert.True(result.Fields.ContainsKey("bio"));
             Assert.True(result.Fields.ContainsKey("email"));
-            Assert.Equal("Senior engineer", result.Fields["bio"].ToString());
-            Assert.Equal("john@example.com", result.Fields["email"].ToString());
+            Assert.True(result.Fields.ContainsKey("avatar_url"));
+            Assert.Equal(
+                "Senior software engineer with 12 years of experience in distributed systems.",
+                result.Fields["bio"].ToString());
+            Assert.Equal("john.smith@example.com", result.Fields["email"].ToString());
         }
 
         [Fact]
-        public void ReadJson_KnownFields_NotDuplicatedInExtensionData()
+        public void ReadJson_EntryJson_NestedObjectField_CapturedInFields()
         {
-            // uid, _content_type_uid, title are declared — they must NOT appear in Fields.
-            var result = DeserializeEntry(EntryJson);
+            // social is a nested object — must land in Fields as a JObject, not be dropped.
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
+            Assert.True(result.Fields.ContainsKey("social"));
+            var social = result.Fields["social"] as JObject;
+            Assert.NotNull(social);
+            Assert.Equal("@johnsmith", social["twitter"]?.ToString());
+            Assert.Equal("linkedin.com/in/johnsmith", social["linkedin"]?.ToString());
+        }
+
+        [Fact]
+        public void ReadJson_EntryJson_ArrayField_CapturedInFields()
+        {
+            // tags is a JSON array — must land in Fields as a JArray.
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
+            Assert.True(result.Fields.ContainsKey("tags"));
+            var tags = result.Fields["tags"] as JArray;
+            Assert.NotNull(tags);
+            Assert.Equal(3, tags.Count);
+            Assert.Contains("dotnet", tags.ToObject<List<string>>());
+        }
+
+        [Fact]
+        public void ReadJson_EntryJson_KnownFields_NotDuplicatedInExtensionData()
+        {
+            // uid, _content_type_uid, title are declared properties — must NOT appear in Fields.
+            var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
             Assert.False(result.Fields.ContainsKey("uid"));
             Assert.False(result.Fields.ContainsKey("_content_type_uid"));
             Assert.False(result.Fields.ContainsKey("title"));
         }
 
+        // ── ReadJson — single embedded asset (embeddedAsset.json) ────────────
+
         [Fact]
-        public void ReadJson_NoCustomFields_FieldsIsEmpty()
+        public void ReadJson_AssetJson_PopulatesFileName_ViaIEmbeddedAsset()
         {
-            var json = @"{ ""uid"": ""blt1"", ""_content_type_uid"": ""author"", ""title"": ""T"" }";
-            var result = DeserializeEntry(json);
-            Assert.Empty(result.Fields);
+            var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
+            var asAsset = result as IEmbeddedAsset;
+            Assert.NotNull(asAsset);
+            Assert.Equal("team-photo-2026.jpg", asAsset.FileName);
         }
 
-        // ── Integration — List<IEmbeddedObject> deserialization ───────────────
+        [Fact]
+        public void ReadJson_AssetJson_PopulatesUrl()
+        {
+            var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
+            Assert.Contains("team-photo-2026.jpg", result.Url);
+        }
+
+        [Fact]
+        public void ReadJson_AssetJson_ContentTypeUid_IsSysAssets()
+        {
+            var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
+            Assert.Equal("sys_assets", result.ContentTypeUid);
+        }
+
+        [Fact]
+        public void ReadJson_AssetJson_DimensionObject_CapturedInFields()
+        {
+            var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
+            Assert.True(result.Fields.ContainsKey("dimension"));
+            var dimension = result.Fields["dimension"] as JObject;
+            Assert.NotNull(dimension);
+            Assert.Equal(1080, dimension["height"]?.Value<int>());
+            Assert.Equal(1920, dimension["width"]?.Value<int>());
+        }
+
+        [Fact]
+        public void ReadJson_AssetJson_FileSize_CapturedInFields()
+        {
+            var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
+            Assert.True(result.Fields.ContainsKey("file_size"));
+            Assert.Equal("284521", result.Fields["file_size"].ToString());
+        }
+
+        // ── Integration — List<IEmbeddedObject> (embeddedItems.json) ─────────
 
         [Fact]
         public void Deserialize_ListOfIEmbeddedObject_WithConverter_Succeeds()
         {
-            var settings = SettingsWithConverter();
-            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(EmbeddedItemsJson, settings);
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                ReadJson("embeddedItems.json"), SettingsWithConverter());
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
+            Assert.Equal(3, result.Count);
             Assert.All(result, item => Assert.IsType<EmbeddedObject>(item));
         }
 
@@ -194,33 +234,123 @@ namespace Contentstack.Utils.Tests
         {
             // Reproduces the customer crash on contentstack.csharp v2.27.0.
             Assert.Throws<JsonSerializationException>(() =>
-                JsonConvert.DeserializeObject<List<IEmbeddedObject>>(EmbeddedItemsJson));
+                JsonConvert.DeserializeObject<List<IEmbeddedObject>>(ReadJson("embeddedItems.json")));
         }
 
         [Fact]
-        public void Deserialize_ListOfIEmbeddedObject_FirstItem_HasCorrectFields()
+        public void Deserialize_ListItem_Entry_HasCorrectKnownFields()
         {
-            var settings = SettingsWithConverter();
-            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(EmbeddedItemsJson, settings);
-            var first = result[0] as EmbeddedObject;
-            Assert.Equal("blt111", first.Uid);
-            Assert.Equal("author", first.ContentTypeUid);
-            Assert.Equal("Alice", first.Title);
-            Assert.Equal("Tech lead", first.Fields["bio"].ToString());
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                ReadJson("embeddedItems.json"), SettingsWithConverter());
+            var entry = result[0] as EmbeddedObject;
+            Assert.Equal("blt05dca76dadb9455e", entry.Uid);
+            Assert.Equal("author", entry.ContentTypeUid);
+            Assert.Equal("John Smith", entry.Title);
         }
 
         [Fact]
-        public void Deserialize_ListOfIEmbeddedObject_SecondItem_IsAsset()
+        public void Deserialize_ListItem_Entry_HasCustomFields()
         {
-            var settings = SettingsWithConverter();
-            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(EmbeddedItemsJson, settings);
-            var second = result[1] as EmbeddedObject;
-            Assert.Equal("blt222", second.Uid);
-            Assert.Equal("logo.png", second.FileName);
-            Assert.Equal("https://cdn.example.com/logo.png", second.Url);
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                ReadJson("embeddedItems.json"), SettingsWithConverter());
+            var entry = result[0] as EmbeddedObject;
+            Assert.Equal("john.smith@example.com", entry.Fields["email"].ToString());
+            Assert.Equal("https://cdn.example.com/authors/john-smith.jpg",
+                entry.Fields["avatar_url"].ToString());
         }
 
-        // ── EmbeddedObject defaults ───────────────────────────────────────────
+        [Fact]
+        public void Deserialize_ListItem_FirstAsset_HasCorrectFields()
+        {
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                ReadJson("embeddedItems.json"), SettingsWithConverter());
+            var asset = result[1] as EmbeddedObject;
+            Assert.Equal("blt61fc86ad844f4793", asset.Uid);
+            Assert.Equal("sys_assets", asset.ContentTypeUid);
+            Assert.Equal("team-photo-2026.jpg", asset.FileName);
+        }
+
+        [Fact]
+        public void Deserialize_ListItem_SecondAsset_HasCorrectFields()
+        {
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                ReadJson("embeddedItems.json"), SettingsWithConverter());
+            var asset = result[2] as EmbeddedObject;
+            Assert.Equal("bltd80ed7f6d9d742ca", asset.Uid);
+            Assert.Equal("screenshot-2026-06-04.png", asset.FileName);
+        }
+
+        // ── Full entry deserialization (rteEntryWithEmbeddedItems.json) ───────
+        // Mirrors the actual Delivery API response shape: { "entry": { ..., "_embedded_items": { ... } } }
+
+        [Fact]
+        public void FullEntry_EmbeddedItems_DeserializesAllThreeItems()
+        {
+            var root = JObject.Parse(ReadJson("rteEntryWithEmbeddedItems.json"));
+            var embeddedItemsToken = root["entry"]["_embedded_items"]["rte_json"].ToString();
+
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                embeddedItemsToken, SettingsWithConverter());
+
+            Assert.Equal(3, result.Count);
+        }
+
+        [Fact]
+        public void FullEntry_EmbeddedItems_FirstItem_IsAuthorEntry()
+        {
+            var root = JObject.Parse(ReadJson("rteEntryWithEmbeddedItems.json"));
+            var embeddedItemsToken = root["entry"]["_embedded_items"]["rte_json"].ToString();
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                embeddedItemsToken, SettingsWithConverter());
+
+            var author = result[0] as EmbeddedObject;
+            Assert.Equal("author", author.ContentTypeUid);
+            Assert.Equal("John Smith", author.Title);
+            Assert.Equal("john.smith@example.com", author.Fields["email"].ToString());
+        }
+
+        [Fact]
+        public void FullEntry_EmbeddedItems_SecondAndThirdItems_AreAssets()
+        {
+            var root = JObject.Parse(ReadJson("rteEntryWithEmbeddedItems.json"));
+            var embeddedItemsToken = root["entry"]["_embedded_items"]["rte_json"].ToString();
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                embeddedItemsToken, SettingsWithConverter());
+
+            Assert.Equal("sys_assets", (result[1] as EmbeddedObject)?.ContentTypeUid);
+            Assert.Equal("sys_assets", (result[2] as EmbeddedObject)?.ContentTypeUid);
+        }
+
+        [Fact]
+        public void FullEntry_EmbeddedItems_AssetDimension_CapturedInFields()
+        {
+            var root = JObject.Parse(ReadJson("rteEntryWithEmbeddedItems.json"));
+            var embeddedItemsToken = root["entry"]["_embedded_items"]["rte_json"].ToString();
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                embeddedItemsToken, SettingsWithConverter());
+
+            var asset = result[1] as EmbeddedObject;
+            var dimension = asset.Fields["dimension"] as JObject;
+            Assert.NotNull(dimension);
+            Assert.Equal(1080, dimension["height"]?.Value<int>());
+            Assert.Equal(1920, dimension["width"]?.Value<int>());
+        }
+
+        [Fact]
+        public void FullEntry_EmbeddedItems_AuthorSocialObject_CapturedInFields()
+        {
+            var root = JObject.Parse(ReadJson("rteEntryWithEmbeddedItems.json"));
+            var embeddedItemsToken = root["entry"]["_embedded_items"]["rte_json"].ToString();
+            var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
+                embeddedItemsToken, SettingsWithConverter());
+
+            var author = result[0] as EmbeddedObject;
+            var social = author.Fields["social"] as JObject;
+            Assert.NotNull(social);
+            Assert.Equal("@johnsmith", social["twitter"]?.ToString());
+        }
+
+        // ── EmbeddedObject default state ──────────────────────────────────────
 
         [Fact]
         public void EmbeddedObject_DefaultValues_AreEmptyStrings()
@@ -259,22 +389,8 @@ namespace Contentstack.Utils.Tests
             Assert.True(typeof(IEmbeddedObject).IsAssignableFrom(typeof(EmbeddedObject)));
         }
 
-        // ── Helpers ───────────────────────────────────────────────────────────
+        // ── Customer-defined subclass (CanConvert isolation check) ────────────
 
-        private static JsonSerializerSettings SettingsWithConverter()
-        {
-            var settings = new JsonSerializerSettings();
-            settings.Converters.Add(new EmbeddedObjectConverter());
-            return settings;
-        }
-
-        private static EmbeddedObject DeserializeEntry(string json)
-        {
-            var settings = SettingsWithConverter();
-            return (EmbeddedObject)JsonConvert.DeserializeObject<IEmbeddedObject>(json, settings);
-        }
-
-        // Customer-defined subclass — used to verify CanConvert does not over-intercept.
         private class CustomerDefinedEmbeddedObject : IEmbeddedObject
         {
             public string Uid { get; set; }

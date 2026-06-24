@@ -1,0 +1,22 @@
+{
+  "uid": "blt61fc86ad844f4793",
+  "_content_type_uid": "sys_assets",
+  "title": "Team Photo 2026",
+  "filename": "team-photo-2026.jpg",
+  "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/blt61fc86ad844f4793/team-photo-2026.jpg",
+  "content_type": "image/jpeg",
+  "file_size": "284521",
+  "locale": "en-us",
+  "is_dir": false,
+  "tags": ["team", "photo", "2026"],
+  "dimension": {
+    "height": 1080,
+    "width": 1920
+  },
+  "publish_details": {
+    "environment": "development",
+    "locale": "en-us",
+    "time": "2026-06-15T10:00:00.000Z",
+    "user": "bltuser123"
+  }
+}

@@ -1,0 +1,67 @@
+[
+  {
+    "uid": "blt05dca76dadb9455e",
+    "_content_type_uid": "author",
+    "title": "John Smith",
+    "locale": "en-us",
+    "_version": 3,
+    "bio": "Senior software engineer with 12 years of experience in distributed systems.",
+    "email": "john.smith@example.com",
+    "avatar_url": "https://cdn.example.com/authors/john-smith.jpg",
+    "social": {
+      "twitter": "@johnsmith",
+      "linkedin": "linkedin.com/in/johnsmith"
+    },
+    "tags": ["engineering", "distributed-systems", "dotnet"],
+    "publish_details": {
+      "environment": "development",
+      "locale": "en-us",
+      "time": "2026-06-20T14:32:00.000Z",
+      "user": "bltuser123"
+    }
+  },
+  {
+    "uid": "blt61fc86ad844f4793",
+    "_content_type_uid": "sys_assets",
+    "title": "Team Photo 2026",
+    "filename": "team-photo-2026.jpg",
+    "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/blt61fc86ad844f4793/team-photo-2026.jpg",
+    "content_type": "image/jpeg",
+    "file_size": "284521",
+    "locale": "en-us",
+    "is_dir": false,
+    "tags": ["team", "photo", "2026"],
+    "dimension": {
+      "height": 1080,
+      "width": 1920
+    },
+    "publish_details": {
+      "environment": "development",
+      "locale": "en-us",
+      "time": "2026-06-15T10:00:00.000Z",
+      "user": "bltuser123"
+    }
+  },
+  {
+    "uid": "bltd80ed7f6d9d742ca",
+    "_content_type_uid": "sys_assets",
+    "title": "Product Screenshot",
+    "filename": "screenshot-2026-06-04.png",
+    "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/bltd80ed7f6d9d742ca/screenshot-2026-06-04.png",
+    "content_type": "image/png",
+    "file_size": "95340",
+    "locale": "en-us",
+    "is_dir": false,
+    "tags": ["screenshot", "product"],
+    "dimension": {
+      "height": 900,
+      "width": 1440
+    },
+    "publish_details": {
+      "environment": "development",
+      "locale": "en-us",
+      "time": "2026-06-10T08:00:00.000Z",
+      "user": "bltuser456"
+    }
+  }
+]
