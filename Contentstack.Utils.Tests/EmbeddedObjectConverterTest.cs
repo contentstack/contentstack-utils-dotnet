@@ -109,7 +109,7 @@ namespace Contentstack.Utils.Tests
         public void ReadJson_EntryJson_PopulatesUid()
         {
             var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
-            Assert.Equal("blt05dca76dadb9455e", result.Uid);
+            Assert.Equal("sample_author_uid", result.Uid);
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace Contentstack.Utils.Tests
         public void ReadJson_EntryJson_PopulatesTitle_ViaIEmbeddedEntry()
         {
             var result = DeserializeSingle(ReadJson("embeddedEntry.json"));
-            Assert.Equal("John Smith", (result as IEmbeddedEntry)?.Title);
+            Assert.Equal("Dummy User", (result as IEmbeddedEntry)?.Title);
         }
 
         [Fact]
@@ -134,9 +134,9 @@ namespace Contentstack.Utils.Tests
             Assert.True(result.Fields.ContainsKey("email"));
             Assert.True(result.Fields.ContainsKey("avatar_url"));
             Assert.Equal(
-                "Senior software engineer with 12 years of experience in distributed systems.",
+                "This is a dummy bio used for testing purposes.",
                 result.Fields["bio"].ToString());
-            Assert.Equal("john.smith@example.com", result.Fields["email"].ToString());
+            Assert.Equal("dummy.user@example.com", result.Fields["email"].ToString());
         }
 
         [Fact]
@@ -147,8 +147,8 @@ namespace Contentstack.Utils.Tests
             Assert.True(result.Fields.ContainsKey("social"));
             var social = result.Fields["social"] as JObject;
             Assert.NotNull(social);
-            Assert.Equal("@johnsmith", social["twitter"]?.ToString());
-            Assert.Equal("linkedin.com/in/johnsmith", social["linkedin"]?.ToString());
+            Assert.Equal("@dummyuser", social["twitter"]?.ToString());
+            Assert.Equal("linkedin.com/in/dummyuser", social["linkedin"]?.ToString());
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace Contentstack.Utils.Tests
             var tags = result.Fields["tags"] as JArray;
             Assert.NotNull(tags);
             Assert.Equal(3, tags.Count);
-            Assert.Contains("dotnet", tags.ToObject<List<string>>());
+            Assert.Contains("sample", tags.ToObject<List<string>>());
         }
 
         [Fact]
@@ -181,14 +181,14 @@ namespace Contentstack.Utils.Tests
             var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
             var asAsset = result as IEmbeddedAsset;
             Assert.NotNull(asAsset);
-            Assert.Equal("team-photo-2026.jpg", asAsset.FileName);
+            Assert.Equal("dummy-image.jpg", asAsset.FileName);
         }
 
         [Fact]
         public void ReadJson_AssetJson_PopulatesUrl()
         {
             var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
-            Assert.Contains("team-photo-2026.jpg", result.Url);
+            Assert.Contains("dummy-image.jpg", result.Url);
         }
 
         [Fact]
@@ -205,8 +205,8 @@ namespace Contentstack.Utils.Tests
             Assert.True(result.Fields.ContainsKey("dimension"));
             var dimension = result.Fields["dimension"] as JObject;
             Assert.NotNull(dimension);
-            Assert.Equal(1080, dimension["height"]?.Value<int>());
-            Assert.Equal(1920, dimension["width"]?.Value<int>());
+            Assert.Equal(100, dimension["height"]?.Value<int>());
+            Assert.Equal(100, dimension["width"]?.Value<int>());
         }
 
         [Fact]
@@ -214,7 +214,7 @@ namespace Contentstack.Utils.Tests
         {
             var result = DeserializeSingle(ReadJson("embeddedAsset.json"));
             Assert.True(result.Fields.ContainsKey("file_size"));
-            Assert.Equal("284521", result.Fields["file_size"].ToString());
+            Assert.Equal("10000", result.Fields["file_size"].ToString());
         }
 
         // ── Integration — List<IEmbeddedObject> (embeddedItems.json) ─────────
@@ -243,9 +243,9 @@ namespace Contentstack.Utils.Tests
             var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
                 ReadJson("embeddedItems.json"), SettingsWithConverter());
             var entry = result[0] as EmbeddedObject;
-            Assert.Equal("blt05dca76dadb9455e", entry.Uid);
+            Assert.Equal("sample_author_uid", entry.Uid);
             Assert.Equal("author", entry.ContentTypeUid);
-            Assert.Equal("John Smith", entry.Title);
+            Assert.Equal("Dummy User", entry.Title);
         }
 
         [Fact]
@@ -254,8 +254,8 @@ namespace Contentstack.Utils.Tests
             var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
                 ReadJson("embeddedItems.json"), SettingsWithConverter());
             var entry = result[0] as EmbeddedObject;
-            Assert.Equal("john.smith@example.com", entry.Fields["email"].ToString());
-            Assert.Equal("https://cdn.example.com/authors/john-smith.jpg",
+            Assert.Equal("dummy.user@example.com", entry.Fields["email"].ToString());
+            Assert.Equal("https://example.com/dummy-avatar.jpg",
                 entry.Fields["avatar_url"].ToString());
         }
 
@@ -265,9 +265,9 @@ namespace Contentstack.Utils.Tests
             var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
                 ReadJson("embeddedItems.json"), SettingsWithConverter());
             var asset = result[1] as EmbeddedObject;
-            Assert.Equal("blt61fc86ad844f4793", asset.Uid);
+            Assert.Equal("sample_asset_uid", asset.Uid);
             Assert.Equal("sys_assets", asset.ContentTypeUid);
-            Assert.Equal("team-photo-2026.jpg", asset.FileName);
+            Assert.Equal("dummy-image.jpg", asset.FileName);
         }
 
         [Fact]
@@ -276,8 +276,8 @@ namespace Contentstack.Utils.Tests
             var result = JsonConvert.DeserializeObject<List<IEmbeddedObject>>(
                 ReadJson("embeddedItems.json"), SettingsWithConverter());
             var asset = result[2] as EmbeddedObject;
-            Assert.Equal("bltd80ed7f6d9d742ca", asset.Uid);
-            Assert.Equal("screenshot-2026-06-04.png", asset.FileName);
+            Assert.Equal("sample_asset_uid_2", asset.Uid);
+            Assert.Equal("dummy-image.png", asset.FileName);
         }
 
         // ── Full entry deserialization (rteEntryWithEmbeddedItems.json) ───────
@@ -305,8 +305,8 @@ namespace Contentstack.Utils.Tests
 
             var author = result[0] as EmbeddedObject;
             Assert.Equal("author", author.ContentTypeUid);
-            Assert.Equal("John Smith", author.Title);
-            Assert.Equal("john.smith@example.com", author.Fields["email"].ToString());
+            Assert.Equal("Dummy User", author.Title);
+            Assert.Equal("dummy.user@example.com", author.Fields["email"].ToString());
         }
 
         [Fact]
@@ -332,8 +332,8 @@ namespace Contentstack.Utils.Tests
             var asset = result[1] as EmbeddedObject;
             var dimension = asset.Fields["dimension"] as JObject;
             Assert.NotNull(dimension);
-            Assert.Equal(1080, dimension["height"]?.Value<int>());
-            Assert.Equal(1920, dimension["width"]?.Value<int>());
+            Assert.Equal(100, dimension["height"]?.Value<int>());
+            Assert.Equal(100, dimension["width"]?.Value<int>());
         }
 
         [Fact]
@@ -347,7 +347,7 @@ namespace Contentstack.Utils.Tests
             var author = result[0] as EmbeddedObject;
             var social = author.Fields["social"] as JObject;
             Assert.NotNull(social);
-            Assert.Equal("@johnsmith", social["twitter"]?.ToString());
+            Assert.Equal("@dummyuser", social["twitter"]?.ToString());
         }
 
         // ── EmbeddedObject default state ──────────────────────────────────────

@@ -1,67 +1,67 @@
 [
   {
-    "uid": "blt05dca76dadb9455e",
+    "uid": "sample_author_uid",
     "_content_type_uid": "author",
-    "title": "John Smith",
+    "title": "Dummy User",
     "locale": "en-us",
-    "_version": 3,
-    "bio": "Senior software engineer with 12 years of experience in distributed systems.",
-    "email": "john.smith@example.com",
-    "avatar_url": "https://cdn.example.com/authors/john-smith.jpg",
+    "_version": 1,
+    "bio": "This is a dummy bio used for testing purposes.",
+    "email": "dummy.user@example.com",
+    "avatar_url": "https://example.com/dummy-avatar.jpg",
     "social": {
-      "twitter": "@johnsmith",
-      "linkedin": "linkedin.com/in/johnsmith"
+      "twitter": "@dummyuser",
+      "linkedin": "linkedin.com/in/dummyuser"
     },
-    "tags": ["engineering", "distributed-systems", "dotnet"],
+    "tags": ["test", "dummy", "sample"],
     "publish_details": {
-      "environment": "development",
+      "environment": "test",
       "locale": "en-us",
-      "time": "2026-06-20T14:32:00.000Z",
-      "user": "bltuser123"
+      "time": "2021-01-01T00:00:00.000Z",
+      "user": "sample_user_uid"
     }
   },
   {
-    "uid": "blt61fc86ad844f4793",
+    "uid": "sample_asset_uid",
     "_content_type_uid": "sys_assets",
-    "title": "Team Photo 2026",
-    "filename": "team-photo-2026.jpg",
-    "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/blt61fc86ad844f4793/team-photo-2026.jpg",
+    "title": "Dummy Image Asset",
+    "filename": "dummy-image.jpg",
+    "url": "https://example.com/assets/dummy-image.jpg",
     "content_type": "image/jpeg",
-    "file_size": "284521",
+    "file_size": "10000",
     "locale": "en-us",
     "is_dir": false,
-    "tags": ["team", "photo", "2026"],
+    "tags": ["test", "dummy"],
     "dimension": {
-      "height": 1080,
-      "width": 1920
+      "height": 100,
+      "width": 100
     },
     "publish_details": {
-      "environment": "development",
+      "environment": "test",
       "locale": "en-us",
-      "time": "2026-06-15T10:00:00.000Z",
-      "user": "bltuser123"
+      "time": "2021-01-01T00:00:00.000Z",
+      "user": "sample_user_uid"
     }
   },
   {
-    "uid": "bltd80ed7f6d9d742ca",
+    "uid": "sample_asset_uid_2",
     "_content_type_uid": "sys_assets",
-    "title": "Product Screenshot",
-    "filename": "screenshot-2026-06-04.png",
-    "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/bltd80ed7f6d9d742ca/screenshot-2026-06-04.png",
+    "title": "Dummy PNG Asset",
+    "filename": "dummy-image.png",
+    "url": "https://example.com/assets/dummy-image.png",
     "content_type": "image/png",
-    "file_size": "95340",
+    "file_size": "5000",
     "locale": "en-us",
     "is_dir": false,
-    "tags": ["screenshot", "product"],
+    "tags": ["test", "dummy"],
     "dimension": {
-      "height": 900,
-      "width": 1440
+      "height": 100,
+      "width": 100
     },
     "publish_details": {
-      "environment": "development",
+      "environment": "test",
       "locale": "en-us",
-      "time": "2026-06-10T08:00:00.000Z",
-      "user": "bltuser456"
+      "time": "2021-01-01T00:00:00.000Z",
+      "user": "sample_user_uid_2"
     }
   }
 ]
