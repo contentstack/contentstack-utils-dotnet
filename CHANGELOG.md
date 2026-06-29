@@ -1,3 +1,9 @@
+### Version: 1.4.0
+#### Date: June-23-2026
+- Added `EmbeddedObject` as a concrete implementation of `IEmbeddedObject`, covering both `IEmbeddedEntry` and `IEmbeddedAsset`.
+- Added `EmbeddedObjectConverter` to resolve `IEmbeddedObject` during JSON deserialization without requiring changes in consumer code.
+- Custom fields on embedded entries and assets are preserved via `[JsonExtensionData]`.
+
 ### Version: 1.3.0
 
 #### Date: May-11-2026
