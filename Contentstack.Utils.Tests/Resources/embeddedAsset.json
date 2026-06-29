@@ -1,22 +1,22 @@
 {
-  "uid": "blt61fc86ad844f4793",
+  "uid": "sample_asset_uid",
   "_content_type_uid": "sys_assets",
-  "title": "Team Photo 2026",
-  "filename": "team-photo-2026.jpg",
-  "url": "https://cdn.contentstack.io/v3/assets/blt34775be4e6d8ab9c/blt61fc86ad844f4793/team-photo-2026.jpg",
+  "title": "Dummy Image Asset",
+  "filename": "dummy-image.jpg",
+  "url": "https://example.com/assets/dummy-image.jpg",
   "content_type": "image/jpeg",
-  "file_size": "284521",
+  "file_size": "10000",
   "locale": "en-us",
   "is_dir": false,
-  "tags": ["team", "photo", "2026"],
+  "tags": ["test", "dummy"],
   "dimension": {
-    "height": 1080,
-    "width": 1920
+    "height": 100,
+    "width": 100
   },
   "publish_details": {
-    "environment": "development",
+    "environment": "test",
     "locale": "en-us",
-    "time": "2026-06-15T10:00:00.000Z",
-    "user": "bltuser123"
+    "time": "2021-01-01T00:00:00.000Z",
+    "user": "sample_user_uid"
   }
 }
