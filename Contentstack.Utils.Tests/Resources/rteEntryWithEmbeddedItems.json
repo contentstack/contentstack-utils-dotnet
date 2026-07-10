@@ -1,0 +1,134 @@
+{
+  "entry": {
+    "uid": "sample_rte_entry_uid",
+    "_content_type_uid": "rte_json_comp",
+    "title": "Test RTE Entry",
+    "locale": "en-us",
+    "_version": 1,
+    "created_at": "2021-01-01T00:00:00.000Z",
+    "updated_at": "2021-01-01T00:00:00.000Z",
+    "author_name": "Test Author",
+    "category": "Test Category",
+    "rte_json": {
+      "type": "doc",
+      "children": [
+        {
+          "type": "p",
+          "children": [
+            { "text": "Featured author: " },
+            {
+              "type": "reference",
+              "attrs": {
+                "type": "entry",
+                "entry-uid": "sample_author_uid",
+                "content-type-uid": "author",
+                "locale": "en-us",
+                "display-type": "inline"
+              },
+              "children": [{ "text": "" }]
+            }
+          ]
+        },
+        {
+          "type": "p",
+          "children": [{ "text": "Sample image below:" }]
+        },
+        {
+          "type": "reference",
+          "attrs": {
+            "type": "asset",
+            "asset-uid": "sample_asset_uid",
+            "content-type-uid": "sys_assets",
+            "display-type": "display"
+          },
+          "children": [{ "text": "" }]
+        },
+        {
+          "type": "reference",
+          "attrs": {
+            "type": "asset",
+            "asset-uid": "sample_asset_uid_2",
+            "content-type-uid": "sys_assets",
+            "display-type": "display"
+          },
+          "children": [{ "text": "" }]
+        }
+      ]
+    },
+    "_embedded_items": {
+      "rte_json": [
+        {
+          "uid": "sample_author_uid",
+          "_content_type_uid": "author",
+          "title": "Dummy User",
+          "locale": "en-us",
+          "_version": 1,
+          "bio": "This is a dummy bio used for testing purposes.",
+          "email": "dummy.user@example.com",
+          "avatar_url": "https://example.com/dummy-avatar.jpg",
+          "social": {
+            "twitter": "@dummyuser",
+            "linkedin": "linkedin.com/in/dummyuser"
+          },
+          "tags": ["test", "dummy", "sample"],
+          "publish_details": {
+            "environment": "test",
+            "locale": "en-us",
+            "time": "2021-01-01T00:00:00.000Z",
+            "user": "sample_user_uid"
+          }
+        },
+        {
+          "uid": "sample_asset_uid",
+          "_content_type_uid": "sys_assets",
+          "title": "Dummy Image Asset",
+          "filename": "dummy-image.jpg",
+          "url": "https://example.com/assets/dummy-image.jpg",
+          "content_type": "image/jpeg",
+          "file_size": "10000",
+          "locale": "en-us",
+          "is_dir": false,
+          "tags": ["test", "dummy"],
+          "dimension": {
+            "height": 100,
+            "width": 100
+          },
+          "publish_details": {
+            "environment": "test",
+            "locale": "en-us",
+            "time": "2021-01-01T00:00:00.000Z",
+            "user": "sample_user_uid"
+          }
+        },
+        {
+          "uid": "sample_asset_uid_2",
+          "_content_type_uid": "sys_assets",
+          "title": "Dummy PNG Asset",
+          "filename": "dummy-image.png",
+          "url": "https://example.com/assets/dummy-image.png",
+          "content_type": "image/png",
+          "file_size": "5000",
+          "locale": "en-us",
+          "is_dir": false,
+          "tags": ["test", "dummy"],
+          "dimension": {
+            "height": 100,
+            "width": 100
+          },
+          "publish_details": {
+            "environment": "test",
+            "locale": "en-us",
+            "time": "2021-01-01T00:00:00.000Z",
+            "user": "sample_user_uid_2"
+          }
+        }
+      ]
+    },
+    "publish_details": {
+      "environment": "test",
+      "locale": "en-us",
+      "time": "2021-01-01T00:00:00.000Z",
+      "user": "sample_user_uid"
+    }
+  }
+}
