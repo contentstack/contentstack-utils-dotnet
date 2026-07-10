@@ -8,8 +8,10 @@ This guide will help you get started with Contentstack .NET Utils SDK to build a
 ## Prerequisites
 To get started with .NET, you will need the following:
 
--   .NET version 3.1 or later
-   
+-   .NET 10 or later
+
+> **Migrating from v1.x?** Version 2.0.0 replaces Newtonsoft.Json with System.Text.Json and changes several public method signatures. See the [migration guide](https://www.contentstack.com/docs/developers/sdks/utils-sdk/dot-net/migrate-dotnet-utils-sdk-from-newtonsoft-to-stj) before upgrading.
+
 ## Setup and Installation
 
 Note: If you are using Contentstack .NET SDK, you don’t need to download the Contentstack.Utils package separately as it will be already available for use.
@@ -145,6 +147,36 @@ Options defaultRender = new Options(entry);
 CustomRenderOption defaultRender = new CustomRenderOption(entry);  
   ```
 > Note: Make sure the entry parameter has implemented the IEmbeddedObject property.
+
+> **Note:** As of v2.0.0, `Node.attrs` values are `System.Text.Json.JsonElement` instead of `Newtonsoft.Json.Linq.JToken`. If you access `attrs` directly, update the accessor:
+> ```c#
+> // Before (v1.x)
+> string src = node.attrs["src"].Value<string>();
+> // After (v2.0.0)
+> string src = node.attrs["src"].GetString();
+> ```
+
+## Variant Utility
+
+Use the `Utils.GetVariantAliases` and `Utils.GetVariantMetadataTags` methods to extract variant alias information from an entry and build the `data-csvariants` attribute payload used for [Personalize](https://www.contentstack.com/docs/personalize) variants. As of v2.0.0, these methods accept `System.Text.Json.Nodes.JsonObject` / `JsonArray` instead of `Newtonsoft.Json.Linq.JObject` / `JArray`.
+
+```c#
+using System.Text.Json.Nodes;
+using Contentstack.Utils;
+
+JsonObject entry = JsonNode.Parse(entryJson)!.AsObject();
+
+// Get variant aliases for a single entry
+JsonObject aliases = Utils.GetVariantAliases(entry, "product");
+
+// Build the data-csvariants attribute payload for a single entry
+JsonObject variantTags = Utils.GetVariantMetadataTags(entry, "product");
+
+// Both methods also accept a JsonArray of entries
+JsonArray entries = JsonNode.Parse(entriesJson)!.AsArray();
+JsonArray aliasesForEntries = Utils.GetVariantAliases(entries, "product");
+JsonObject variantTagsForEntries = Utils.GetVariantMetadataTags(entries, "product");
+```
 
 ## Basic Queries
 
