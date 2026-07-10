@@ -34,6 +34,21 @@
 - RTE JSON deserialization tolerates **trailing commas** when using the documented test/helper patterns (`AllowTrailingCommas`); attribute dictionaries may surface **`JsonElement`** values instead of boxed strings—use helpers or unwrap explicitly if you access `Node.attrs` directly.
 - Internal: `LangVersion` set to **latest** for multi-target builds; utilities normalize attribute values where the HTML pipeline expects strings.
 
+### Version: 1.4.0
+#### Date: June-23-2026
+- Added `EmbeddedObject` as a concrete implementation of `IEmbeddedObject`, covering both `IEmbeddedEntry` and `IEmbeddedAsset`.
+- Added `EmbeddedObjectConverter` to resolve `IEmbeddedObject` during JSON deserialization without requiring changes in consumer code.
+- Custom fields on embedded entries and assets are preserved via `[JsonExtensionData]`.
+
+### Version: 1.3.0
+
+#### Date: May-11-2026
+- Added Live Preview editable tags support through `addEditableTags` and `addTags`.
+- Added variant-aware CSLP tag generation using `_applied_variants` / `system.applied_variants`.
+- Added nested fields, arrays, references, and null-safe editable tag generation.
+- Added configurable locale casing through `AddEditableTagsOptions.UseLowerCaseLocale`.
+- Added unit tests for Live Preview editable tags.
+
 ### Version: 1.2.0
 #### Date: March-31-2026
 - Added `GetVariantMetadataTags(JObject, string)` and `GetVariantMetadataTags(JArray, string)` as the canonical API for building the `data-csvariants` payload (same behavior as the previous helpers).
