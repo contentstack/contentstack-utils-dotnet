@@ -1,3 +1,19 @@
+### Version: 2.0.0
+#### Date: July-10-2026
+- **Breaking:** Replaced **Newtonsoft.Json** with **System.Text.Json** across the package. The `Newtonsoft.Json` package reference is removed; add `System.Text.Json` (or rely on the BCL on supported runtimes) as needed in consuming projects.
+- **Breaking:** `GetVariantAliases(JObject, string)` / `GetVariantAliases(JArray, string)` → `GetVariantAliases(JsonObject, string)` / `GetVariantAliases(JsonArray, string)`.
+- **Breaking:** `GetVariantMetadataTags(JObject, string)` / `GetVariantMetadataTags(JArray, string)` → `GetVariantMetadataTags(JsonObject, string)` / `GetVariantMetadataTags(JsonArray, string)`.
+- **Breaking:** `GetDataCsvariantsAttribute(JObject/JArray, string)` is deprecated and now maps to `JsonObject`/`JsonArray` overloads.
+- **Breaking:** `Node.attrs` values are now `System.Text.Json.JsonElement` instead of `Newtonsoft.Json.Linq.JToken` — update `node.attrs["src"].Value<string>()` to `node.attrs["src"].GetString()`.
+- **Breaking:** Model classes use `[JsonPropertyName]` instead of `[JsonProperty]`.
+- **Breaking:** Requires **.NET 10** or later (previously netstandard2.0 / net6.0).
+- **New:** Multi-region endpoint resolution via `Endpoint.GetContentstackEndpoint(region, service)` — resolves Contentstack service URLs for all 7 supported regions (NA, EU, AU, Azure-NA, Azure-EU, GCP-NA, GCP-EU) and 18 service keys (contentDelivery, contentManagement, auth, graphqlDelivery, preview, images, assets, automate, launch, developerHub, brandKit, genAI, personalizeManagement, personalizeEdge, composableStudio, assetManagement, and more).
+- **New:** `Utils.GetContentstackEndpoint(region, service)` proxy — access endpoint resolution directly from the `Utils` class without importing `Contentstack.Utils.Endpoints`.
+- **New:** `omitHttps` flag strips the `https://` scheme from returned URLs — pass directly to SDK host configuration (e.g. `new ContentstackOptions { Host = Endpoint.GetContentstackEndpoint("eu", "contentDelivery", omitHttps: true) }`).
+- **New:** Case-insensitive region alias support — `"us"`, `"NA"`, `"AWS-NA"`, `"azure_na"` all resolve correctly to the same region.
+- **New:** `regions.json` registry auto-downloaded from `artifacts.contentstack.com` on first use and cached on disk — no setup required. The SDK self-heals if the file is missing.
+- **New:** `Scripts/refresh-region.py` bundled inside the NuGet package — automatically placed in your project's `Scripts/` folder on first `dotnet build`. Run `python3 Scripts/refresh-region.py` (Mac/Linux) or `python Scripts/refresh-region.py` (Windows) anytime to pull the latest regions from CDN.
+
 ### Version: 2.0.0-beta.2
 #### Date: June-22-2026
 - **New:** Multi-region endpoint resolution via `Endpoint.GetContentstackEndpoint(region, service)` — resolves Contentstack service URLs for all 7 supported regions (NA, EU, AU, Azure-NA, Azure-EU, GCP-NA, GCP-EU) and 18 service keys (contentDelivery, contentManagement, auth, graphqlDelivery, preview, images, assets, automate, launch, developerHub, brandKit, genAI, personalizeManagement, personalizeEdge, composableStudio, assetManagement, and more).
