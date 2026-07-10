@@ -1,5 +1,5 @@
 ### Version: 2.0.0
-#### Date: July-10-2026
+#### Date: July-13-2026
 - **Breaking:** Replaced **Newtonsoft.Json** with **System.Text.Json** across the package. The `Newtonsoft.Json` package reference is removed; add `System.Text.Json` (or rely on the BCL on supported runtimes) as needed in consuming projects.
 - **Breaking:** `GetVariantAliases(JObject, string)` / `GetVariantAliases(JArray, string)` → `GetVariantAliases(JsonObject, string)` / `GetVariantAliases(JsonArray, string)`.
 - **Breaking:** `GetVariantMetadataTags(JObject, string)` / `GetVariantMetadataTags(JArray, string)` → `GetVariantMetadataTags(JsonObject, string)` / `GetVariantMetadataTags(JsonArray, string)`.
