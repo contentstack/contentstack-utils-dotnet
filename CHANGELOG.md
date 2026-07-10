@@ -14,6 +14,9 @@
 - **New:** `regions.json` registry auto-downloaded from `artifacts.contentstack.com` on first use and cached on disk — no setup required. The SDK self-heals if the file is missing.
 - **New:** `Scripts/refresh-region.py` bundled inside the NuGet package — automatically placed in your project's `Scripts/` folder on first `dotnet build`. Run `python3 Scripts/refresh-region.py` (Mac/Linux) or `python Scripts/refresh-region.py` (Windows) anytime to pull the latest regions from CDN.
 
+##### Migration Guide:
+- See [Migrating from Newtonsoft.Json to System.Text.Json](https://www.contentstack.com/docs/developers/sdks/utils-sdk/dot-net/migrate-dotnet-utils-sdk-from-newtonsoft.json-to-system.text.json) for the full upgrade path from v1.x.
+
 ### Version: 2.0.0-beta.2
 #### Date: June-22-2026
 - **New:** Multi-region endpoint resolution via `Endpoint.GetContentstackEndpoint(region, service)` — resolves Contentstack service URLs for all 7 supported regions (NA, EU, AU, Azure-NA, Azure-EU, GCP-NA, GCP-EU) and 18 service keys (contentDelivery, contentManagement, auth, graphqlDelivery, preview, images, assets, automate, launch, developerHub, brandKit, genAI, personalizeManagement, personalizeEdge, composableStudio, assetManagement, and more).
