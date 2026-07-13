@@ -1,3 +1,39 @@
+### Version: 2.0.0
+#### Date: July-13-2026
+- **Breaking:** Replaced **Newtonsoft.Json** with **System.Text.Json** across the package. The `Newtonsoft.Json` package reference is removed; add `System.Text.Json` (or rely on the BCL on supported runtimes) as needed in consuming projects.
+- **Breaking:** `GetVariantAliases(JObject, string)` / `GetVariantAliases(JArray, string)` → `GetVariantAliases(JsonObject, string)` / `GetVariantAliases(JsonArray, string)`.
+- **Breaking:** `GetVariantMetadataTags(JObject, string)` / `GetVariantMetadataTags(JArray, string)` → `GetVariantMetadataTags(JsonObject, string)` / `GetVariantMetadataTags(JsonArray, string)`.
+- **Breaking:** `GetDataCsvariantsAttribute(JObject/JArray, string)` is deprecated and now maps to `JsonObject`/`JsonArray` overloads.
+- **Breaking:** `Node.attrs` values are now `System.Text.Json.JsonElement` instead of `Newtonsoft.Json.Linq.JToken` — update `node.attrs["src"].Value<string>()` to `node.attrs["src"].GetString()`.
+- **Breaking:** Model classes use `[JsonPropertyName]` instead of `[JsonProperty]`.
+- **Breaking:** Requires **.NET 10** or later (previously netstandard2.0 / net6.0).
+- **New:** Multi-region endpoint resolution via `Endpoint.GetContentstackEndpoint(region, service)` — resolves Contentstack service URLs for all 7 supported regions (NA, EU, AU, Azure-NA, Azure-EU, GCP-NA, GCP-EU) and 18 service keys (contentDelivery, contentManagement, auth, graphqlDelivery, preview, images, assets, automate, launch, developerHub, brandKit, genAI, personalizeManagement, personalizeEdge, composableStudio, assetManagement, and more).
+- **New:** `Utils.GetContentstackEndpoint(region, service)` proxy — access endpoint resolution directly from the `Utils` class without importing `Contentstack.Utils.Endpoints`.
+- **New:** `omitHttps` flag strips the `https://` scheme from returned URLs — pass directly to SDK host configuration (e.g. `new ContentstackOptions { Host = Endpoint.GetContentstackEndpoint("eu", "contentDelivery", omitHttps: true) }`).
+- **New:** Case-insensitive region alias support — `"us"`, `"NA"`, `"AWS-NA"`, `"azure_na"` all resolve correctly to the same region.
+- **New:** `regions.json` registry auto-downloaded from `artifacts.contentstack.com` on first use and cached on disk — no setup required. The SDK self-heals if the file is missing.
+- **New:** `Scripts/refresh-region.py` bundled inside the NuGet package — automatically placed in your project's `Scripts/` folder on first `dotnet build`. Run `python3 Scripts/refresh-region.py` (Mac/Linux) or `python Scripts/refresh-region.py` (Windows) anytime to pull the latest regions from CDN.
+
+##### Migration Guide:
+- See [Migrating from Newtonsoft.Json to System.Text.Json](https://www.contentstack.com/docs/developers/sdks/utils-sdk/dot-net/migrate-dotnet-utils-sdk-from-newtonsoft.json-to-system.text.json) for the full upgrade path from v1.x.
+
+### Version: 2.0.0-beta.2
+#### Date: June-22-2026
+- **New:** Multi-region endpoint resolution via `Endpoint.GetContentstackEndpoint(region, service)` — resolves Contentstack service URLs for all 7 supported regions (NA, EU, AU, Azure-NA, Azure-EU, GCP-NA, GCP-EU) and 18 service keys (contentDelivery, contentManagement, auth, graphqlDelivery, preview, images, assets, automate, launch, developerHub, brandKit, genAI, personalizeManagement, personalizeEdge, composableStudio, assetManagement, and more).
+- **New:** `Utils.GetContentstackEndpoint(region, service)` proxy — access endpoint resolution directly from the `Utils` class without importing `Contentstack.Utils.Endpoints`.
+- **New:** `omitHttps` flag strips the `https://` scheme from returned URLs — pass directly to SDK host configuration (e.g. `new ContentstackOptions { Host = Endpoint.GetContentstackEndpoint("eu", "contentDelivery", omitHttps: true) }`).
+- **New:** Case-insensitive region alias support — `"us"`, `"NA"`, `"AWS-NA"`, `"azure_na"` all resolve correctly to the same region.
+- **New:** `regions.json` registry auto-downloaded from `artifacts.contentstack.com` on first use and cached on disk — no setup required. The SDK self-heals if the file is missing.
+- **New:** `Scripts/refresh-region.py` bundled inside the NuGet package — automatically placed in your project's `Scripts/` folder on first `dotnet build`. Run `python3 Scripts/refresh-region.py` (Mac/Linux) or `python Scripts/refresh-region.py` (Windows) anytime to pull the latest regions from CDN.
+
+### Version: 2.0.0-beta.1
+#### Date: April-27-2026
+- **Breaking:** Replaced **Newtonsoft.Json** with **System.Text.Json** across the package. The `Newtonsoft.Json` package reference is removed; add `System.Text.Json` (or rely on the BCL on supported runtimes) as needed in consuming projects.
+- **Breaking:** Variant metadata APIs that previously took `JObject` / `JArray` now use `System.Text.Json.Nodes.JsonObject` and `JsonArray` (`GetVariantAliases`, `GetVariantMetadataTags`, and obsolete `GetDataCsvariantsAttribute` overloads).
+- JSON serialization uses the same model attributes with `System.Text.Json.Serialization` (`JsonPropertyName`, `JsonConverter`), including custom converters for RTE/GQL-shaped JSON and **path-mapped** embedded models (`PathMappedJsonConverter<T>`).
+- RTE JSON deserialization tolerates **trailing commas** when using the documented test/helper patterns (`AllowTrailingCommas`); attribute dictionaries may surface **`JsonElement`** values instead of boxed strings—use helpers or unwrap explicitly if you access `Node.attrs` directly.
+- Internal: `LangVersion` set to **latest** for multi-target builds; utilities normalize attribute values where the HTML pipeline expects strings.
+
 ### Version: 1.4.0
 #### Date: June-23-2026
 - Added `EmbeddedObject` as a concrete implementation of `IEmbeddedObject`, covering both `IEmbeddedEntry` and `IEmbeddedAsset`.
@@ -13,7 +49,7 @@
 - Added configurable locale casing through `AddEditableTagsOptions.UseLowerCaseLocale`.
 - Added unit tests for Live Preview editable tags.
 
-
+### Version: 1.2.0
 #### Date: March-31-2026
 - Added `GetVariantMetadataTags(JObject, string)` and `GetVariantMetadataTags(JArray, string)` as the canonical API for building the `data-csvariants` payload (same behavior as the previous helpers).
 

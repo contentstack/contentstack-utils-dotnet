@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Xunit;
 using Contentstack.Utils.Models;
 using Contentstack.Utils.Interfaces;
-using Newtonsoft.Json.Linq;
-using System.IO;
 
 namespace Contentstack.Utils.Tests
 {
@@ -15,12 +13,6 @@ namespace Contentstack.Utils.Tests
     public class LivePreviewTagsTest
     {
         #region Test Data and Helpers
-
-        private static JObject ReadJsonRoot(string fileName)
-        {
-            var path = Path.Combine(AppContext.BaseDirectory, "Resources", fileName);
-            return JObject.Parse(File.ReadAllText(path));
-        }
 
         private Dictionary<string, object> CreateBasicEntry()
         {

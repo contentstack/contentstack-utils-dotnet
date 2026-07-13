@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using Contentstack.Utils.Enums;
 using Contentstack.Utils.Interfaces;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using Contentstack.Utils;
 
 namespace Contentstack.Utils.Models
 {
@@ -105,14 +106,12 @@ namespace Contentstack.Utils.Models
                 var styleVal = node.attrs["style"];
                 if (styleVal != null)
                 {
-                    if (styleVal is string)
+                    if (styleVal is string styleStr)
                     {
-                        styleAttrs = $" style=\"{styleVal}\"";
+                        styleAttrs = $" style=\"{styleStr}\"";
                     }
-                    else if (styleVal is JObject)
+                    else if (JsonAttrValue.TryGetStyleObject(styleVal, out Dictionary<string, string> styleDictionary) && styleDictionary != null)
                     {
-                        var styleObject = (JObject)styleVal;
-                        var styleDictionary = styleObject.ToObject<Dictionary<string, string>>();
                         styleAttrs = " style=\"";
                         foreach (var pair in styleDictionary)
                         {
@@ -129,28 +128,28 @@ namespace Contentstack.Utils.Models
                 case "a":
                     if (node.attrs?.ContainsKey("url")==true)
                     {
-                        href = (string)node.attrs["url"];
+                        href = JsonAttrValue.AsString(node.attrs["url"]);
                     }
                     if (node.attrs?.ContainsKey("target") == true)
                     {
-                        target = (string)node.attrs["target"];
+                        target = JsonAttrValue.AsString(node.attrs["target"]);
                     }
                     if (node.attrs?.ContainsKey("title") == true)
                     {
-                        title = (string)node.attrs["title"];
+                        title = JsonAttrValue.AsString(node.attrs["title"]);
                     }
                     return $"<a href=\"{href}\"  target=\"{target}\" title=\"{title}\" {styleAttrs}>{callBack(node.children)}</a>";
 
                 case "img":
                     if (node.attrs.ContainsKey("url"))
                     {
-                        href = (string)node.attrs["url"];
+                        href = JsonAttrValue.AsString(node.attrs["url"]);
                     }
                     return $"<img{styleAttrs} src=\"{href}\" />{callBack(node.children)}";
                 case "embed":
                     if (node.attrs.ContainsKey("url"))
                     {
-                        href = (string)node.attrs["url"];
+                        href = JsonAttrValue.AsString(node.attrs["url"]);
                     }
                     return $"<iframe{styleAttrs} src=\"{href}\">{callBack(node.children)}</iframe>";
                 case "fragment":
