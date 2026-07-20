@@ -1,3 +1,7 @@
+### Version: 2.0.1
+#### Date: July-20-2026
+- **Fix:** Bumped package version to 2.0.1. The 2.0.0 package published on nuget.org was built before `EmbeddedObjectConverter` was added, so the published package and source had silently diverged under the same version number. This release re-publishes with the version number unambiguously matching the source.
+
 ### Version: 2.0.0
 #### Date: July-13-2026
 - **Breaking:** Replaced **Newtonsoft.Json** with **System.Text.Json** across the package. The `Newtonsoft.Json` package reference is removed; add `System.Text.Json` (or rely on the BCL on supported runtimes) as needed in consuming projects.
