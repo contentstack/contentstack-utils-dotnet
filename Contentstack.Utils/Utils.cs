@@ -133,7 +133,8 @@ namespace Contentstack.Utils
 
         private static string textToHtml(TextNode textNode, Options options)
         {
-            var text = textNode.text;
+            // Text nodes are content, never markup: encode before any mark wraps them.
+            var text = HtmlEscaper.Text(textNode.text);
             if (textNode.superscript)
             {
                 text = options.RenderMark(MarkType.Superscript, text: text);
