@@ -35,19 +35,18 @@ namespace Contentstack.Utils.Models
 
         public virtual string RenderOption(IEmbeddedObject embeddedObject, Metadata metadata)
         {
-            string uid = EscapeText(embeddedObject.Uid);
             string linkText = EmbeddedLinkText(metadata);
             switch (metadata.StyleType)
             {
                 case Enums.StyleType.Block:
-                    string renderString = "<div><p>" + uid + "</p>";
+                    string renderString = "<div><p>" + embeddedObject.Uid + "</p>";
                     if (embeddedObject is IEmbeddedEntry)
                     {
                         renderString += "<p>Content type: <span>" + EscapeText(((IEmbeddedEntry)embeddedObject).Title) + "</span></p>";
                     }
                     else
                     {
-                        renderString += "<p>Content type: <span>" + EscapeText(embeddedObject.ContentTypeUid) + "</span></p>";
+                        renderString += "<p>Content type: <span>" + embeddedObject.ContentTypeUid + "</span></p>";
                     }
                     renderString = renderString + "</div>";
                     return renderString;
@@ -57,28 +56,28 @@ namespace Contentstack.Utils.Models
                     {
                         return "<span>" + EscapeText(((IEmbeddedEntry)embeddedObject).Title) + "</span>";
                     }
-                    return "<span>" + uid + "</span>";
+                    return "<span>" + embeddedObject.Uid + "</span>";
 
                 case Enums.StyleType.Link:
                     if (embeddedObject is IEmbeddedEntry)
                     {
-                        return "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + (linkText ?? EscapeText(((IEmbeddedEntry)embeddedObject).Title)) + "</a>";
+                        return "<a href=\"" + embeddedObject.Uid + "\">" + (linkText ?? EscapeText(((IEmbeddedEntry)embeddedObject).Title)) + "</a>";
                     }
-                    return "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + (linkText ?? uid) + "</a>";
+                    return "<a href=\"" + embeddedObject.Uid + "\">" + (linkText ?? embeddedObject.Uid) + "</a>";
 
                 case Enums.StyleType.Display:
                     if (embeddedObject is IEmbeddedAsset)
                     {
                         return "<img src=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\" alt=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Title) + "\" />";
                     }
-                    return "<img src=\"" + EscapeAttribute(embeddedObject.Uid) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";
+                    return "<img src=\"" + embeddedObject.Uid + "\" alt=\"" + embeddedObject.Uid + "\" />";
 
                 case Enums.StyleType.Download:
                     if (embeddedObject is IEmbeddedAsset)
                     {
                         return "<a href=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\">" + (linkText ?? EscapeText(((IEmbeddedAsset)embeddedObject).Title)) + "</a>";
                     }
-                    return "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + (linkText ?? uid) + "</a>";
+                    return "<a href=\"" + embeddedObject.Uid + "\">" + (linkText ?? embeddedObject.Uid) + "</a>";
             }
             return "";
         }
