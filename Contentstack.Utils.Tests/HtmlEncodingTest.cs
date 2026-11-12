@@ -9,8 +9,9 @@ using Xunit;
 namespace Contentstack.Utils.Tests
 {
     /// <summary>
-    /// Content values must be rendered as text or quoted attribute values, never as markup,
-    /// and links/media may only use safe URL schemes.
+    /// With EscapeHtml on (the default), content values render as text or quoted attribute values,
+    /// never as markup, and javascript:, vbscript: and non-image data: URLs are blocked.
+    /// With EscapeHtml off, output matches versions before 2.1.0.
     /// </summary>
     public class HtmlEncodingTest
     {
@@ -24,6 +25,18 @@ namespace Contentstack.Utils.Tests
         private string Render(string children)
         {
             return Utils.JsonToHtml(NodeParser.parse(Doc(children)), options);
+        }
+
+        private static string RenderUnescaped(string children)
+        {
+            return Utils.JsonToHtml(NodeParser.parse(Doc(children)), new Options { EscapeHtml = false });
+        }
+
+        [Fact]
+        public void EscapeHtml_Is_On_By_Default()
+        {
+            Assert.True(new Options().EscapeHtml);
+            Assert.True(new Options(new EmbeddedModel("")).EscapeHtml);
         }
 
         [Fact]
@@ -63,6 +76,7 @@ namespace Contentstack.Utils.Tests
         [InlineData("\\u0001javascript:alert(1)")]
         [InlineData("vbscript:msgbox(1)")]
         [InlineData("data:text/html,<script>alert(1)</script>")]
+        [InlineData("data:image/svg+xml,<svg onload=alert(1)>")]
         public void Link_With_Unsafe_Scheme_Is_Dropped(string url)
         {
             var result = Render("{\"type\":\"a\",\"attrs\":{\"url\":\"" + url + "\"},\"children\":[{\"text\":\"x\"}]}");
@@ -78,9 +92,10 @@ namespace Contentstack.Utils.Tests
         [InlineData("tel:+1-555-0100", "tel:+1-555-0100")]
         [InlineData("sms:+15550100", "sms:+15550100")]
         [InlineData("ftp://files.example.com/a.zip", "ftp://files.example.com/a.zip")]
-        [InlineData("page:2", "#")]
+        [InlineData("myapp://open/item?id=1", "myapp://open/item?id=1")]
+        [InlineData("page:2", "page:2")]
         [InlineData("", "")]
-        public void Link_Url_Is_Filtered_And_Encoded(string url, string expectedHref)
+        public void Link_Url_Is_Kept_And_Encoded(string url, string expectedHref)
         {
             var result = Render("{\"type\":\"a\",\"attrs\":{\"url\":\"" + url + "\"},\"children\":[{\"text\":\"x\"}]}");
             Assert.Equal("<a href=\"" + expectedHref + "\"  target=\"\" title=\"\" >x</a>", result);
@@ -114,6 +129,7 @@ namespace Contentstack.Utils.Tests
         [Theory]
         [InlineData("javascript:alert(1)", "")]
         [InlineData("data:text/html,<script>alert(1)</script>", "")]
+        [InlineData("data:image/svg+xml,<svg onload=alert(1)>", "")]
         [InlineData("https://www.youtube.com/embed/abc", "https://www.youtube.com/embed/abc")]
         public void Embed_Url_Scheme_Is_Filtered(string url, string expectedSrc)
         {
@@ -156,6 +172,13 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
+        public void Embedded_Link_With_Unsafe_Uid_Is_Dropped()
+        {
+            var entry = new UnsafeEntry { Uid = "javascript:alert(1)", ContentTypeUid = "ct", Title = "t" };
+            Assert.Equal("<a href=\"#\">t</a>", options.RenderOption(entry, new Metadata { StyleType = StyleType.Link }));
+        }
+
+        [Fact]
         public void Embedded_Link_Text_Is_Encoded()
         {
             var entry = new UnsafeEntry { Uid = "uid", ContentTypeUid = "ct", Title = "t" };
@@ -172,6 +195,13 @@ namespace Contentstack.Utils.Tests
                 options.RenderOption(asset, new Metadata { StyleType = StyleType.Display }));
             Assert.Equal("<a href=\"#\">\"&gt;&lt;script&gt;alert(1)&lt;/script&gt;</a>",
                 options.RenderOption(asset, new Metadata { StyleType = StyleType.Download }));
+        }
+
+        [Fact]
+        public void Attribute_Uses_Html_Encoder_For_Non_Ascii()
+        {
+            var result = Render("{\"type\":\"a\",\"attrs\":{\"url\":\"https://example.com\",\"title\":\"Caf\u00e9\"},\"children\":[{\"text\":\"Caf\u00e9\"}]}");
+            Assert.Equal("<a href=\"https://example.com\"  target=\"\" title=\"Caf&#233;\" >Caf\u00e9</a>", result);
         }
 
         [Fact]
@@ -201,6 +231,51 @@ namespace Contentstack.Utils.Tests
 
             Assert.Contains("<a href=\"uid\">&lt;script&gt;alert(1)&lt;/script&gt;</a>", result);
             Assert.DoesNotContain("<script>", result);
+        }
+
+        [Fact]
+        public void EscapeHtml_Off_Restores_Previous_Text_Output()
+        {
+            Assert.Equal("<p><strong><b>x</b></strong></p>",
+                RenderUnescaped("{\"type\":\"p\",\"attrs\":{},\"children\":[{\"text\":\"<b>x</b>\",\"bold\":true}]}"));
+        }
+
+        [Fact]
+        public void EscapeHtml_Off_Restores_Previous_Attribute_Output()
+        {
+            Assert.Equal("<a href=\"javascript:alert(1)\"  target=\"\" title=\"a\"b\" >x</a>",
+                RenderUnescaped("{\"type\":\"a\",\"attrs\":{\"url\":\"javascript:alert(1)\",\"title\":\"a\\\"b\"},\"children\":[{\"text\":\"x\"}]}"));
+            Assert.Equal("<img src=\"data:text/html,x\" />",
+                RenderUnescaped("{\"type\":\"img\",\"attrs\":{\"url\":\"data:text/html,x\"},\"children\":[{\"text\":\"\"}]}"));
+        }
+
+        [Fact]
+        public void EscapeHtml_Off_Restores_Previous_Embedded_Output()
+        {
+            var unescaped = new Options { EscapeHtml = false };
+            var entry = new UnsafeEntry { Uid = "uid", ContentTypeUid = "ct", Title = "<i>t</i>" };
+            var asset = new UnsafeAsset { Uid = "asset_uid", Title = "a&b", Url = "javascript:alert(1)" };
+
+            Assert.Equal("<span><i>t</i></span>", unescaped.RenderOption(entry, new Metadata { StyleType = StyleType.Inline }));
+            Assert.Equal("<a href=\"uid\"><b>x</b></a>", unescaped.RenderOption(entry, new Metadata { StyleType = StyleType.Link, Text = "<b>x</b>" }));
+            Assert.Equal("<img src=\"javascript:alert(1)\" alt=\"a&b\" />", unescaped.RenderOption(asset, new Metadata { StyleType = StyleType.Display }));
+        }
+
+        [Fact]
+        public void Custom_Renderer_Can_Use_Escape_Helpers()
+        {
+            var custom = new HelperRenderer();
+            Assert.Equal("<a href=\"#\" data-x=\"&quot;\">&lt;b&gt;</a>", custom.Render("javascript:alert(1)", "\"", "<b>"));
+            custom.EscapeHtml = false;
+            Assert.Equal("<a href=\"javascript:alert(1)\" data-x=\"\"\"><b></a>", custom.Render("javascript:alert(1)", "\"", "<b>"));
+        }
+
+        private class HelperRenderer : Options
+        {
+            public string Render(string url, string attr, string text)
+            {
+                return $"<a href=\"{EscapeUrl(url)}\" data-x=\"{EscapeAttribute(attr)}\">{EscapeText(text)}</a>";
+            }
         }
 
         private class UnsafeEntry : IEmbeddedEntry
