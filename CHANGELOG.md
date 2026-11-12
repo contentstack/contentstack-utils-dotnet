@@ -1,13 +1,12 @@
 ### Version: 2.1.0
 #### Date: November-13-2026
-- **Fix:** The default JSON RTE renderer (`Utils.JsonToHtml`, including the GQL overloads) and the default `Options` renderer now escape RTE content. Text nodes escape `&`, `<` and `>`. Attribute values (`title`, `target`, `style`, `class`, `id`, `alt`) are encoded with `System.Net.WebUtility.HtmlEncode`. Text escaping matches the Java Utils SDK.
-- **Fix:** `javascript:`, `vbscript:` and `data:` URLs are blocked in links, images, embeds and embedded entries/assets, following the rule Studio uses. `data:image/` URLs are allowed only in image `src`. A blocked link renders as `href="#"`; a blocked image or embed renders with an empty `src`. Allowed URLs are HTML-encoded.
+- **Fix:** The default JSON RTE renderer (`Utils.JsonToHtml`, including the GQL overloads) and the default `Options` renderer now escape RTE content, as the Java Utils SDK does. Text nodes escape `&`, `<` and `>`. Attribute values (`href`, `src`, `title`, `target`, `style`, `class`, `id`, `alt`) are encoded with `System.Net.WebUtility.HtmlEncode`, so a value can't break out of its attribute.
 - **Fix:** Embedded entry/asset rendering (`RenderOption`) escapes titles, UIDs, link text and asset URLs. For HTML RTE, embedded link text is entity-decoded once before escaping, so it is not double-escaped.
 - **New:** `Options.EscapeHtml` (default `true`). Set it to `false` to restore the unescaped output of earlier versions.
-- **New:** Protected helpers `EscapeText`, `EscapeAttribute` and `EscapeUrl` on `Options` for custom renderers. They follow `EscapeHtml`.
+- **New:** `Options.EscapeText` and `Options.EscapeAttribute` for custom renderers. They follow `EscapeHtml`.
 - **Behavior change:** HTML typed as text inside JSON RTE text nodes now displays as text. `RenderMark` now receives escaped text, and the `RenderNode` children callback returns escaped HTML. Custom renderers that escaped these themselves should stop, or set `EscapeHtml = false`. `node.attrs` values, entry fields and the `className`/`id` arguments of `RenderMark` still arrive raw; escape them with the helpers above.
-- **Behavior change:** Non-ASCII characters in attribute values may be written as numeric entities (for example `é` becomes `&#233;`). Browsers display them the same.
-- **Note:** `Utils.RenderContent` (HTML RTE) still returns the stored HTML as is; only the embedded entries and assets it replaces are escaped.
+- **Behavior change:** `&` in URLs is written as `&amp;`, and non-ASCII characters in attribute values may be written as numeric entities (for example `é` becomes `&#233;`). Browsers read both the same.
+- **Note:** URL schemes are not filtered (same as the Java and JavaScript Utils SDKs), so a `javascript:` URL in the content is kept. `Utils.RenderContent` (HTML RTE) still returns the stored HTML as is; only the embedded entries and assets it replaces are escaped.
 
 ### Version: 2.0.1
 #### Date: July-20-2026

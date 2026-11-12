@@ -114,24 +114,24 @@ public  class CustomRenderOption: Options
 				{  
 					return  $"<span> Please find link to: <a><b>{EscapeText(metadata.Text ?? embeddedObject.Uid)}</b></a></span>";  
 				}  
-				return  "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
+				return  "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
 
 			//if you have embedded an asset into the RTE field
 			case StyleType.Display:  
 				if (embeddedObject is IEmbeddedAsset)  
 				{  
 					var asset = (IEmbeddedAsset)embeddedObject;
-					return  $"<b>{EscapeText(asset.Title)}</b><p>{EscapeText(asset.FileName)} image: <img src=\"{EscapeUrl(asset.Url, "", isImage: true)}\" alt=\"{EscapeAttribute(asset.Title)}\"/></p>";  
+					return  $"<b>{EscapeText(asset.Title)}</b><p>{EscapeText(asset.FileName)} image: <img src=\"{EscapeAttribute(asset.Url)}\" alt=\"{EscapeAttribute(asset.Title)}\"/></p>";  
 				}  
-				return  "<img src=\"" + EscapeUrl(embeddedObject.Uid, "", isImage: true) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";  
+				return  "<img src=\"" + EscapeAttribute(embeddedObject.Uid) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";  
 
 			//if you have embedded an asset directly via a download link.
 			case StyleType.Download:  
 				if (embeddedObject is IEmbeddedAsset)  
 				{  
-					return  "<span> Please find link to: <a href=\"" + EscapeUrl(((IEmbeddedAsset)embeddedObject).Url) + "\">" + EscapeText(metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a></span>";  
+					return  "<span> Please find link to: <a href=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\">" + EscapeText(metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a></span>";  
 				}  
-				return  "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
+				return  "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
 		}  
 		return  base.RenderOption(embeddedObject, metadata);  
 	}  
@@ -159,13 +159,13 @@ CustomRenderOption defaultRender = new CustomRenderOption(entry);
 
 ## HTML escaping
 
-From v2.1.0 the default renderers escape RTE content before writing it into HTML. This is on by default.
+From v2.1.0 the default renderers escape RTE content before writing it into HTML, the same way the Java Utils SDK does. This is on by default.
 
 - **Text nodes:** `&`, `<` and `>` are escaped, so HTML typed as text displays as text.
-- **Attribute values** (`title`, `target`, `style`, `class`, `id`, `alt`): encoded with `System.Net.WebUtility.HtmlEncode`.
-- **URLs** (`href`, `src`): `javascript:`, `vbscript:` and `data:` URLs are blocked; `data:image/` is allowed only in an image `src`. A blocked link renders as `href="#"`; a blocked image or embed renders with an empty `src`. All other URLs are kept and encoded.
+- **Attribute values** (`href`, `src`, `title`, `target`, `style`, `class`, `id`, `alt`): encoded with `System.Net.WebUtility.HtmlEncode`, so a value can't break out of its attribute.
+- **URL schemes are not filtered.** As in the Java and JavaScript Utils SDKs, a `javascript:` URL stored in the content is written into `href` as is. If authors you don't trust can edit content, sanitize the rendered HTML (for example with an HTML sanitizer library) before you display it.
 
-Custom renderers now receive escaped text in `RenderMark` and escaped child HTML from the `RenderNode` callback, so don't escape those again. They are safe as element content, not inside an attribute. Values you read yourself, such as `node.attrs`, entry fields or the `className`/`id` arguments, still arrive raw. Escape them with the protected helpers on `Options`:
+Custom renderers now receive escaped text in `RenderMark` and escaped child HTML from the `RenderNode` callback, so don't escape those again. They are safe as element content, not inside an attribute. Values you read yourself, such as `node.attrs`, entry fields or the `className`/`id` arguments, still arrive raw. Escape them with `EscapeText` and `EscapeAttribute` on `Options`:
 
 ```c#
 public override string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
@@ -173,13 +173,13 @@ public override string RenderNode(string nodeType, Node node, NodeChildrenCallBa
     if (nodeType == "a")
     {
         string url = ((System.Text.Json.JsonElement)node.attrs["url"]).GetString();
-        return $"<a class=\"link\" href=\"{EscapeUrl(url)}\">{callBack(node.children)}</a>";
+        return $"<a class=\"link\" href=\"{EscapeAttribute(url)}\">{callBack(node.children)}</a>";
     }
     return base.RenderNode(nodeType, node, callBack);
 }
 ```
 
-`EscapeText`, `EscapeAttribute` and `EscapeUrl` are the helpers (pass `isImage: true` to `EscapeUrl` for an image `src`). To restore the unescaped output of earlier versions, set `EscapeHtml = false`. Only do this if your content is trusted or you sanitize the rendered HTML yourself:
+To restore the unescaped output of earlier versions, set `EscapeHtml = false`:
 
 ```c#
 Options renderOption = new Options(entry) { EscapeHtml = false };
