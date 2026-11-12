@@ -20,17 +20,12 @@ namespace Contentstack.Utils.Models
         public IEntryEmbedable entry;
 
         /// <summary>
-        /// When true (the default), the default renderers HTML-escape RTE content: text is escaped
-        /// like the Java Utils SDK does (&amp;, &lt;, &gt;) and attribute values, including URLs, are
-        /// encoded with <see cref="System.Net.WebUtility.HtmlEncode(string)"/>. Set to false to restore
-        /// the unescaped output of versions before 2.1.0.
+        /// HTML-escape RTE content when rendering. Default true.
         /// </summary>
         public bool EscapeHtml { get; set; } = true;
 
         /// <summary>
-        /// Escapes &amp;, &lt; and &gt; for use as HTML text content. Returns the value unchanged
-        /// when <see cref="EscapeHtml"/> is false. Use it in custom renderers for raw values such as
-        /// entry fields or node attributes.
+        /// Escapes a value for HTML text content.
         /// </summary>
         public string EscapeText(string value)
         {
@@ -40,9 +35,7 @@ namespace Contentstack.Utils.Models
         }
 
         /// <summary>
-        /// Encodes a value for use inside a quoted HTML attribute (including href and src) with
-        /// <see cref="System.Net.WebUtility.HtmlEncode(string)"/>. Returns the value unchanged when
-        /// <see cref="EscapeHtml"/> is false.
+        /// Escapes a value for an HTML attribute.
         /// </summary>
         public string EscapeAttribute(string value)
         {
@@ -99,11 +92,6 @@ namespace Contentstack.Utils.Models
             return "";
         }
 
-        /// <summary>
-        /// Text shown inside an embedded link, or null when the metadata carries none. For HTML RTE
-        /// content the text comes from parsed markup and may contain entities, so it is decoded once
-        /// before being escaped.
-        /// </summary>
         private string EmbeddedLinkText(Metadata metadata)
         {
             if (metadata.Text == null || !EscapeHtml)
