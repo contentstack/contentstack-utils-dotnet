@@ -1,154 +1,67 @@
 using System;
+using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Contentstack.Utils
 {
     /// <summary>
-    /// Encoding helpers used by the default JSON RTE / embedded-object renderers so that
-    /// content values are always emitted as text or as quoted attribute values, never as markup.
+    /// Escaping used by the default renderers. Mirrors the other Contentstack SDKs:
+    /// attribute values use the platform HTML encoder (as Java uses StringEscapeUtils.escapeHtml4),
+    /// text nodes escape &amp;, &lt; and &gt; (as the Java Utils SDK does), and URLs follow the scheme
+    /// rule used by Studio (block javascript:, vbscript: and data:, allowing data:image/ only for images).
     /// </summary>
     internal static class HtmlEscaper
     {
-        private static readonly Regex SchemePattern = new Regex(@"^([a-zA-Z][a-zA-Z0-9+.\-]*):", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-
-        private static readonly string[] LinkSchemes = { "http", "https", "mailto", "tel", "sms", "ftp" };
-        private static readonly string[] MediaSchemes = { "http", "https" };
+        private static readonly string[] BlockedSchemes = { "javascript:", "vbscript:", "data:" };
 
         /// <summary>
-        /// Encodes a value for use as HTML text content (between tags).
+        /// Escapes a value written as HTML text content.
         /// </summary>
         internal static string Text(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return value;
-
-            StringBuilder sb = null;
-            for (int i = 0; i < value.Length; i++)
-            {
-                string replacement;
-                switch (value[i])
-                {
-                    case '&': replacement = "&amp;"; break;
-                    case '<': replacement = "&lt;"; break;
-                    case '>': replacement = "&gt;"; break;
-                    default: replacement = null; break;
-                }
-                if (replacement != null)
-                {
-                    if (sb == null)
-                    {
-                        sb = new StringBuilder(value.Length + 16);
-                        sb.Append(value, 0, i);
-                    }
-                    sb.Append(replacement);
-                }
-                else if (sb != null)
-                {
-                    sb.Append(value[i]);
-                }
-            }
-            return sb == null ? value : sb.ToString();
+            return value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
         }
 
         /// <summary>
-        /// Encodes a value for use inside a double- or single-quoted HTML attribute.
+        /// Escapes a value written inside a quoted HTML attribute.
         /// </summary>
         internal static string Attribute(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                return value;
-
-            StringBuilder sb = null;
-            for (int i = 0; i < value.Length; i++)
-            {
-                string replacement;
-                switch (value[i])
-                {
-                    case '&': replacement = "&amp;"; break;
-                    case '<': replacement = "&lt;"; break;
-                    case '>': replacement = "&gt;"; break;
-                    case '"': replacement = "&quot;"; break;
-                    case '\'': replacement = "&#39;"; break;
-                    default: replacement = null; break;
-                }
-                if (replacement != null)
-                {
-                    if (sb == null)
-                    {
-                        sb = new StringBuilder(value.Length + 16);
-                        sb.Append(value, 0, i);
-                    }
-                    sb.Append(replacement);
-                }
-                else if (sb != null)
-                {
-                    sb.Append(value[i]);
-                }
-            }
-            return sb == null ? value : sb.ToString();
+            return WebUtility.HtmlEncode(value);
         }
 
         /// <summary>
-        /// Attribute-encodes a link target (a href). Relative URLs and http, https, mailto, tel, sms and ftp
-        /// are kept; any other scheme (for example javascript: or data:) is replaced with "#".
+        /// Escapes a URL for an attribute, or returns <paramref name="fallback"/> when the URL uses a
+        /// blocked scheme: javascript:, vbscript: or data:. When <paramref name="isImage"/> is true,
+        /// data:image/ URLs are allowed.
         /// </summary>
-        internal static string LinkUrl(string url)
+        internal static string Url(string url, string fallback, bool isImage = false)
         {
             if (string.IsNullOrEmpty(url))
                 return url;
-            return Attribute(FilterUrl(url, LinkSchemes, allowDataImage: false) ?? "#");
+            return IsBlockedUrl(url, isImage) ? fallback : Attribute(url);
         }
 
-        /// <summary>
-        /// Attribute-encodes an image source. Relative URLs, http, https and data:image/ are kept.
-        /// </summary>
-        internal static string ImageUrl(string url)
+        private static bool IsBlockedUrl(string url, bool isImage)
         {
-            return Attribute(FilterUrl(url, MediaSchemes, allowDataImage: true) ?? "");
-        }
-
-        /// <summary>
-        /// Attribute-encodes an iframe/embed source. Only relative URLs, http and https are kept.
-        /// </summary>
-        internal static string FrameUrl(string url)
-        {
-            return Attribute(FilterUrl(url, MediaSchemes, allowDataImage: false) ?? "");
-        }
-
-        /// <summary>
-        /// Returns the URL unchanged when it is relative or uses an allowed scheme, otherwise null.
-        /// </summary>
-        private static string FilterUrl(string url, string[] allowedSchemes, bool allowDataImage)
-        {
-            if (string.IsNullOrEmpty(url))
-                return url;
-
-            // Mirror how browsers read a URL before resolving its scheme: leading C0 controls and
-            // spaces are ignored, and ASCII tab / LF / CR are removed anywhere in the string.
-            StringBuilder normalized = new StringBuilder(url.Length);
+            // Like the RTE editor sanitizer, drop whitespace before reading the scheme, and also drop
+            // other control characters. This is stricter than browsers, so it can only over-block.
+            var normalized = new StringBuilder(url.Length);
             foreach (char c in url)
             {
-                if (c == '\t' || c == '\n' || c == '\r')
-                    continue;
-                if (normalized.Length == 0 && c <= ' ')
-                    continue;
-                normalized.Append(c);
+                if (c > ' ')
+                    normalized.Append(char.ToLowerInvariant(c));
             }
+            string value = normalized.ToString();
 
-            Match match = SchemePattern.Match(normalized.ToString());
-            if (!match.Success)
-                return url; // relative, fragment or query-only URL
-
-            string scheme = match.Groups[1].Value.ToLowerInvariant();
-            if (Array.IndexOf(allowedSchemes, scheme) >= 0)
-                return url;
-
-            if (allowDataImage && scheme == "data"
-                && normalized.ToString().StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
-                return url;
-
-            return null;
+            foreach (string scheme in BlockedSchemes)
+            {
+                if (value.StartsWith(scheme, StringComparison.Ordinal))
+                    return !(isImage && scheme == "data:" && value.StartsWith("data:image/", StringComparison.Ordinal));
+            }
+            return false;
         }
     }
 }
