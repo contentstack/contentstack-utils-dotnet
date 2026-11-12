@@ -19,15 +19,30 @@ namespace Contentstack.Utils.Models
 
         public IEntryEmbedable entry;
 
+        public bool EscapeHtml { get; set; } = true;
+
+        public string EscapeText(string value)
+        {
+            if (!EscapeHtml || string.IsNullOrEmpty(value))
+                return value;
+            return value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
+        }
+
+        public string EscapeAttribute(string value)
+        {
+            return EscapeHtml ? System.Net.WebUtility.HtmlEncode(value) : value;
+        }
+
         public virtual string RenderOption(IEmbeddedObject embeddedObject, Metadata metadata)
         {
+            string linkText = EmbeddedLinkText(metadata);
             switch (metadata.StyleType)
             {
                 case Enums.StyleType.Block:
                     string renderString = "<div><p>" + embeddedObject.Uid + "</p>";
                     if (embeddedObject is IEmbeddedEntry)
                     {
-                        renderString += "<p>Content type: <span>" + ((IEmbeddedEntry)embeddedObject).Title + "</span></p>";
+                        renderString += "<p>Content type: <span>" + EscapeText(((IEmbeddedEntry)embeddedObject).Title) + "</span></p>";
                     }
                     else
                     {
@@ -39,32 +54,40 @@ namespace Contentstack.Utils.Models
                 case Enums.StyleType.Inline:
                     if (embeddedObject is IEmbeddedEntry)
                     {
-                        return "<span>" + ((IEmbeddedEntry)embeddedObject).Title + "</span>";
+                        return "<span>" + EscapeText(((IEmbeddedEntry)embeddedObject).Title) + "</span>";
                     }
                     return "<span>" + embeddedObject.Uid + "</span>";
 
                 case Enums.StyleType.Link:
                     if (embeddedObject is IEmbeddedEntry)
                     {
-                        return "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? ((IEmbeddedEntry)embeddedObject).Title) + "</a>";
+                        return "<a href=\"" + embeddedObject.Uid + "\">" + (linkText ?? EscapeText(((IEmbeddedEntry)embeddedObject).Title)) + "</a>";
                     }
-                    return "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a>";
+                    return "<a href=\"" + embeddedObject.Uid + "\">" + (linkText ?? embeddedObject.Uid) + "</a>";
 
                 case Enums.StyleType.Display:
                     if (embeddedObject is IEmbeddedAsset)
                     {
-                        return "<img src=\"" + ((IEmbeddedAsset)embeddedObject).Url + "\" alt=\"" + ((IEmbeddedAsset)embeddedObject).Title + "\" />";
+                        return "<img src=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\" alt=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Title) + "\" />";
                     }
                     return "<img src=\"" + embeddedObject.Uid + "\" alt=\"" + embeddedObject.Uid + "\" />";
 
                 case Enums.StyleType.Download:
                     if (embeddedObject is IEmbeddedAsset)
                     {
-                        return "<a href=\"" + ((IEmbeddedAsset)embeddedObject).Url + "\">" + (metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a>";
+                        return "<a href=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\">" + (linkText ?? EscapeText(((IEmbeddedAsset)embeddedObject).Title)) + "</a>";
                     }
-                    return "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a>";
+                    return "<a href=\"" + embeddedObject.Uid + "\">" + (linkText ?? embeddedObject.Uid) + "</a>";
             }
             return "";
+        }
+
+        private string EmbeddedLinkText(Metadata metadata)
+        {
+            if (metadata.Text == null || !EscapeHtml)
+                return metadata.Text;
+            string text = string.IsNullOrEmpty(metadata.OuterHTML) ? metadata.Text : HtmlAgilityPack.HtmlEntity.DeEntitize(metadata.Text);
+            return EscapeText(text);
         }
 
         public virtual string RenderMark(MarkType markType, string text, string className = "", string id = "")
@@ -87,8 +110,8 @@ namespace Contentstack.Utils.Models
                     return $"<sup>{text}</sup>";
                 case MarkType.Id:
                 case MarkType.Class:
-                    string classAttr = !string.IsNullOrEmpty(className) ? $" class=\"{className}\"" : "";
-                    string idAttr = !string.IsNullOrEmpty(id) ? $" id=\"{id}\"" : "";
+                    string classAttr = !string.IsNullOrEmpty(className) ? $" class=\"{EscapeAttribute(className)}\"" : "";
+                    string idAttr = !string.IsNullOrEmpty(id) ? $" id=\"{EscapeAttribute(id)}\"" : "";
                     return $"<span{classAttr}{idAttr}>{text}</span>";
             }
             return text;
@@ -108,14 +131,14 @@ namespace Contentstack.Utils.Models
                 {
                     if (styleVal is string styleStr)
                     {
-                        styleAttrs = $" style=\"{styleStr}\"";
+                        styleAttrs = $" style=\"{EscapeAttribute(styleStr)}\"";
                     }
                     else if (JsonAttrValue.TryGetStyleObject(styleVal, out Dictionary<string, string> styleDictionary) && styleDictionary != null)
                     {
                         styleAttrs = " style=\"";
                         foreach (var pair in styleDictionary)
                         {
-                            styleAttrs += $"{pair.Key}:{pair.Value};";
+                            styleAttrs += $"{EscapeAttribute(pair.Key)}:{EscapeAttribute(pair.Value)};";
                         }
                         styleAttrs += "\"";
                     }
@@ -128,28 +151,28 @@ namespace Contentstack.Utils.Models
                 case "a":
                     if (node.attrs?.ContainsKey("url")==true)
                     {
-                        href = JsonAttrValue.AsString(node.attrs["url"]);
+                        href = EscapeAttribute(JsonAttrValue.AsString(node.attrs["url"]));
                     }
                     if (node.attrs?.ContainsKey("target") == true)
                     {
-                        target = JsonAttrValue.AsString(node.attrs["target"]);
+                        target = EscapeAttribute(JsonAttrValue.AsString(node.attrs["target"]));
                     }
                     if (node.attrs?.ContainsKey("title") == true)
                     {
-                        title = JsonAttrValue.AsString(node.attrs["title"]);
+                        title = EscapeAttribute(JsonAttrValue.AsString(node.attrs["title"]));
                     }
                     return $"<a href=\"{href}\"  target=\"{target}\" title=\"{title}\" {styleAttrs}>{callBack(node.children)}</a>";
 
                 case "img":
                     if (node.attrs.ContainsKey("url"))
                     {
-                        href = JsonAttrValue.AsString(node.attrs["url"]);
+                        href = EscapeAttribute(JsonAttrValue.AsString(node.attrs["url"]));
                     }
                     return $"<img{styleAttrs} src=\"{href}\" />{callBack(node.children)}";
                 case "embed":
                     if (node.attrs.ContainsKey("url"))
                     {
-                        href = JsonAttrValue.AsString(node.attrs["url"]);
+                        href = EscapeAttribute(JsonAttrValue.AsString(node.attrs["url"]));
                     }
                     return $"<iframe{styleAttrs} src=\"{href}\">{callBack(node.children)}</iframe>";
                 case "fragment":

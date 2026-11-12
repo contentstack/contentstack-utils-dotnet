@@ -1,3 +1,10 @@
+### Version: 2.1.0
+#### Date: November-13-2026
+- **Fix:** `JsonToHtml` and the default `Options` renderer now HTML-escape RTE content. Text nodes escape `&`, `<` and `>`; attribute values are encoded with `WebUtility.HtmlEncode`; embedded entry/asset titles, URLs and link text are escaped.
+- **New:** `Options.EscapeHtml` (default `true`). Set to `false` to keep the previous unescaped output.
+- **New:** `Options.EscapeText` and `Options.EscapeAttribute` for custom renderers.
+- **Behavior change:** HTML entered as text in JSON RTE now renders as text. `RenderMark` and the `RenderNode` children callback now receive escaped content; custom renderers should not escape it again.
+
 ### Version: 2.0.1
 #### Date: July-20-2026
 - **Fix:** Bumped package version to 2.0.1. The 2.0.0 package published on nuget.org was built before `EmbeddedObjectConverter` was added, so the published package and source had silently diverged under the same version number. This release re-publishes with the version number unambiguously matching the source.

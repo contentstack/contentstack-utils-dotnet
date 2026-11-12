@@ -84,11 +84,11 @@ public  class CustomRenderOption: Options
 				string renderString = "";  
 				if (embeddedObject is IEmbeddedEntry)  
 				{  
-					renderString += $"<div> <b>{((IEmbeddedEntry)embeddedObject).Title}</b></div>";  
+					renderString += $"<div> <b>{EscapeText(((IEmbeddedEntry)embeddedObject).Title)}</b></div>";  
 				}  
 				else  if (embeddedObject is IEmbeddedContentTypeUid)  
 				{  
-					renderString += $"<div> <b>{embeddedObject.Uid}</b></div>";  
+					renderString += $"<div> <b>{EscapeText(embeddedObject.Uid)}</b></div>";  
 				}  
 				return renderString;  
 			
@@ -96,41 +96,42 @@ public  class CustomRenderOption: Options
 			case StyleType.Inline:  
 				if (embeddedObject is IEmbeddedEntry)  
 				{  
-					return  $"<span><b>{((IEmbeddedEntry)embeddedObject).Title}</b></span>";  
+					return  $"<span><b>{EscapeText(((IEmbeddedEntry)embeddedObject).Title)}</b></span>";  
 				}  
 				else  if (embeddedObject is IEmbeddedContentTypeUid)  
 				{  
-					return  $"<span><b>{embeddedObject.Uid}</b></span>";  
+					return  $"<span><b>{EscapeText(embeddedObject.Uid)}</b></span>";  
 				}  
-				return  "<span>" + embeddedObject.Uid + "</span>";  
+				return  "<span>" + EscapeText(embeddedObject.Uid) + "</span>";  
 				
 			//if you have added embedded object using the “Link” option
 			case StyleType.Link:  
 				if (embeddedObject is IEmbeddedEntry)  
 				{ 
-					return  $"<span> Please find link to: <a><b>{metadata.Text ?? ((IEmbeddedEntry)embeddedObject).Title}</b></a></span>";  
+					return  $"<span> Please find link to: <a><b>{EscapeText(metadata.Text ?? ((IEmbeddedEntry)embeddedObject).Title)}</b></a></span>";  
 				}  
 				else  if (embeddedObject is IEmbeddedContentTypeUid)  
 				{  
-					return  $"<span> Please find link to: <a><b>{metadata.Text ?? embeddedObject.Uid}</b></a></span>";  
+					return  $"<span> Please find link to: <a><b>{EscapeText(metadata.Text ?? embeddedObject.Uid)}</b></a></span>";  
 				}  
-				return  "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a></span>";  
+				return  "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
 
 			//if you have embedded an asset into the RTE field
 			case StyleType.Display:  
 				if (embeddedObject is IEmbeddedAsset)  
 				{  
-					return  $"<b>{((IEmbeddedAsset)embeddedObject).Title}</b><p>{((IEmbeddedAsset)embeddedObject).FileName} image: <img src=\"{((IEmbeddedAsset)embeddedObject).Url}\" alt=\"{((IEmbeddedAsset)embeddedObject).Title}\"/></p>";  
+					var asset = (IEmbeddedAsset)embeddedObject;
+					return  $"<b>{EscapeText(asset.Title)}</b><p>{EscapeText(asset.FileName)} image: <img src=\"{EscapeAttribute(asset.Url)}\" alt=\"{EscapeAttribute(asset.Title)}\"/></p>";  
 				}  
-				return  "<img src=\"" + embeddedObject.Uid + "\" alt=\"" + embeddedObject.Uid + "\" />";  
+				return  "<img src=\"" + EscapeAttribute(embeddedObject.Uid) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";  
 
 			//if you have embedded an asset directly via a download link.
 			case StyleType.Download:  
 				if (embeddedObject is IEmbeddedAsset)  
 				{  
-					return  "<span> Please find link to: <a href=\"" + ((IEmbeddedAsset)embeddedObject).Url + "\">" + (metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a></span>";  
+					return  "<span> Please find link to: <a href=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\">" + EscapeText(metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a></span>";  
 				}  
-				return  "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a>";  
+				return  "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
 		}  
 		return  base.RenderOption(embeddedObject, metadata);  
 	}  
@@ -153,8 +154,25 @@ CustomRenderOption defaultRender = new CustomRenderOption(entry);
 > // Before (v1.x)
 > string src = node.attrs["src"].Value<string>();
 > // After (v2.0.0)
-> string src = node.attrs["src"].GetString();
+> string src = ((System.Text.Json.JsonElement)node.attrs["src"]).GetString();
 > ```
+
+## HTML escaping
+
+From v2.1.0 the default renderers HTML-escape RTE content: text nodes escape `&`, `<` and `>`, and attribute values are encoded with `WebUtility.HtmlEncode`.
+
+`RenderMark` and the `RenderNode` children callback receive escaped content. Values you read yourself (for example `node.attrs` or entry fields) are raw; escape them with `EscapeText` or `EscapeAttribute`:
+
+```c#
+string url = ((System.Text.Json.JsonElement)node.attrs["url"]).GetString();
+return $"<a href=\"{EscapeAttribute(url)}\">{callBack(node.children)}</a>";
+```
+
+To keep the previous unescaped output:
+
+```c#
+Options renderOption = new Options(entry) { EscapeHtml = false };
+```
 
 ## Variant Utility
 

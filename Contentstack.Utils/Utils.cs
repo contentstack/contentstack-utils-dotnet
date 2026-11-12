@@ -133,7 +133,7 @@ namespace Contentstack.Utils
 
         private static string textToHtml(TextNode textNode, Options options)
         {
-            var text = textNode.text;
+            var text = options.EscapeText(textNode.text);
             if (textNode.superscript)
             {
                 text = options.RenderMark(MarkType.Superscript, text: text);
