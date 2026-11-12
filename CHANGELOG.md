@@ -1,12 +1,9 @@
 ### Version: 2.1.0
 #### Date: November-13-2026
-- **Fix:** The default JSON RTE renderer (`Utils.JsonToHtml`, including the GQL overloads) and the default `Options` renderer now escape RTE content, as the Java Utils SDK does. Text nodes escape `&`, `<` and `>`. Attribute values (`href`, `src`, `title`, `target`, `style`, `class`, `id`, `alt`) are encoded with `System.Net.WebUtility.HtmlEncode`, so a value can't break out of its attribute.
-- **Fix:** Embedded entry/asset rendering (`RenderOption`) escapes titles, UIDs, link text and asset URLs. For HTML RTE, embedded link text is entity-decoded once before escaping, so it is not double-escaped.
-- **New:** `Options.EscapeHtml` (default `true`). Set it to `false` to restore the unescaped output of earlier versions.
-- **New:** `Options.EscapeText` and `Options.EscapeAttribute` for custom renderers. They follow `EscapeHtml`.
-- **Behavior change:** HTML typed as text inside JSON RTE text nodes now displays as text. `RenderMark` now receives escaped text, and the `RenderNode` children callback returns escaped HTML. Custom renderers that escaped these themselves should stop, or set `EscapeHtml = false`. `node.attrs` values, entry fields and the `className`/`id` arguments of `RenderMark` still arrive raw; escape them with the helpers above.
-- **Behavior change:** `&` in URLs is written as `&amp;`, and non-ASCII characters in attribute values may be written as numeric entities (for example `é` becomes `&#233;`). Browsers read both the same.
-- **Note:** URL schemes are not filtered (same as the Java and JavaScript Utils SDKs), so a `javascript:` URL in the content is kept. `Utils.RenderContent` (HTML RTE) still returns the stored HTML as is; only the embedded entries and assets it replaces are escaped.
+- **Fix:** `JsonToHtml` and the default `Options` renderer now HTML-escape RTE content. Text nodes escape `&`, `<` and `>`; attribute values are encoded with `WebUtility.HtmlEncode`; embedded entry/asset titles, UIDs and link text are escaped.
+- **New:** `Options.EscapeHtml` (default `true`). Set to `false` to keep the previous unescaped output.
+- **New:** `Options.EscapeText` and `Options.EscapeAttribute` for custom renderers.
+- **Behavior change:** HTML entered as text in JSON RTE now renders as text. `RenderMark` and the `RenderNode` children callback now receive escaped content; custom renderers should not escape it again.
 
 ### Version: 2.0.1
 #### Date: July-20-2026

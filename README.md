@@ -159,33 +159,20 @@ CustomRenderOption defaultRender = new CustomRenderOption(entry);
 
 ## HTML escaping
 
-From v2.1.0 the default renderers escape RTE content before writing it into HTML, the same way the Java Utils SDK does. This is on by default.
+From v2.1.0 the default renderers HTML-escape RTE content: text nodes escape `&`, `<` and `>`, and attribute values are encoded with `WebUtility.HtmlEncode`.
 
-- **Text nodes:** `&`, `<` and `>` are escaped, so HTML typed as text displays as text.
-- **Attribute values** (`href`, `src`, `title`, `target`, `style`, `class`, `id`, `alt`): encoded with `System.Net.WebUtility.HtmlEncode`, so a value can't break out of its attribute.
-- **URL schemes are not filtered.** As in the Java and JavaScript Utils SDKs, a `javascript:` URL stored in the content is written into `href` as is. If authors you don't trust can edit content, sanitize the rendered HTML (for example with an HTML sanitizer library) before you display it.
-
-Custom renderers now receive escaped text in `RenderMark` and escaped child HTML from the `RenderNode` callback, so don't escape those again. They are safe as element content, not inside an attribute. Values you read yourself, such as `node.attrs`, entry fields or the `className`/`id` arguments, still arrive raw. Escape them with `EscapeText` and `EscapeAttribute` on `Options`:
+`RenderMark` and the `RenderNode` children callback receive escaped content. Values you read yourself (for example `node.attrs` or entry fields) are raw; escape them with `EscapeText` or `EscapeAttribute`:
 
 ```c#
-public override string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
-{
-    if (nodeType == "a")
-    {
-        string url = ((System.Text.Json.JsonElement)node.attrs["url"]).GetString();
-        return $"<a class=\"link\" href=\"{EscapeAttribute(url)}\">{callBack(node.children)}</a>";
-    }
-    return base.RenderNode(nodeType, node, callBack);
-}
+string url = ((System.Text.Json.JsonElement)node.attrs["url"]).GetString();
+return $"<a href=\"{EscapeAttribute(url)}\">{callBack(node.children)}</a>";
 ```
 
-To restore the unescaped output of earlier versions, set `EscapeHtml = false`:
+To keep the previous unescaped output:
 
 ```c#
 Options renderOption = new Options(entry) { EscapeHtml = false };
 ```
-
-The HTML RTE path (`Utils.RenderContent`) still returns the stored HTML as is; only the embedded entries and assets it replaces are escaped.
 
 ## Variant Utility
 
