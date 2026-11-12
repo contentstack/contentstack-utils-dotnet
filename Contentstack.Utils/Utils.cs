@@ -133,7 +133,6 @@ namespace Contentstack.Utils
 
         private static string textToHtml(TextNode textNode, Options options)
         {
-            // Text nodes are content, not markup: escape before any mark wraps them.
             var text = options.EscapeText(textNode.text);
             if (textNode.superscript)
             {
