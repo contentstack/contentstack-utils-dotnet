@@ -84,11 +84,11 @@ public  class CustomRenderOption: Options
 				string renderString = "";  
 				if (embeddedObject is IEmbeddedEntry)  
 				{  
-					renderString += $"<div> <b>{((IEmbeddedEntry)embeddedObject).Title}</b></div>";  
+					renderString += $"<div> <b>{EscapeText(((IEmbeddedEntry)embeddedObject).Title)}</b></div>";  
 				}  
 				else  if (embeddedObject is IEmbeddedContentTypeUid)  
 				{  
-					renderString += $"<div> <b>{embeddedObject.Uid}</b></div>";  
+					renderString += $"<div> <b>{EscapeText(embeddedObject.Uid)}</b></div>";  
 				}  
 				return renderString;  
 			
@@ -96,41 +96,42 @@ public  class CustomRenderOption: Options
 			case StyleType.Inline:  
 				if (embeddedObject is IEmbeddedEntry)  
 				{  
-					return  $"<span><b>{((IEmbeddedEntry)embeddedObject).Title}</b></span>";  
+					return  $"<span><b>{EscapeText(((IEmbeddedEntry)embeddedObject).Title)}</b></span>";  
 				}  
 				else  if (embeddedObject is IEmbeddedContentTypeUid)  
 				{  
-					return  $"<span><b>{embeddedObject.Uid}</b></span>";  
+					return  $"<span><b>{EscapeText(embeddedObject.Uid)}</b></span>";  
 				}  
-				return  "<span>" + embeddedObject.Uid + "</span>";  
+				return  "<span>" + EscapeText(embeddedObject.Uid) + "</span>";  
 				
 			//if you have added embedded object using the “Link” option
 			case StyleType.Link:  
 				if (embeddedObject is IEmbeddedEntry)  
 				{ 
-					return  $"<span> Please find link to: <a><b>{metadata.Text ?? ((IEmbeddedEntry)embeddedObject).Title}</b></a></span>";  
+					return  $"<span> Please find link to: <a><b>{EscapeText(metadata.Text ?? ((IEmbeddedEntry)embeddedObject).Title)}</b></a></span>";  
 				}  
 				else  if (embeddedObject is IEmbeddedContentTypeUid)  
 				{  
-					return  $"<span> Please find link to: <a><b>{metadata.Text ?? embeddedObject.Uid}</b></a></span>";  
+					return  $"<span> Please find link to: <a><b>{EscapeText(metadata.Text ?? embeddedObject.Uid)}</b></a></span>";  
 				}  
-				return  "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a></span>";  
+				return  "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
 
 			//if you have embedded an asset into the RTE field
 			case StyleType.Display:  
 				if (embeddedObject is IEmbeddedAsset)  
 				{  
-					return  $"<b>{((IEmbeddedAsset)embeddedObject).Title}</b><p>{((IEmbeddedAsset)embeddedObject).FileName} image: <img src=\"{((IEmbeddedAsset)embeddedObject).Url}\" alt=\"{((IEmbeddedAsset)embeddedObject).Title}\"/></p>";  
+					var asset = (IEmbeddedAsset)embeddedObject;
+					return  $"<b>{EscapeText(asset.Title)}</b><p>{EscapeText(asset.FileName)} image: <img src=\"{EscapeUrl(asset.Url, "", isImage: true)}\" alt=\"{EscapeAttribute(asset.Title)}\"/></p>";  
 				}  
-				return  "<img src=\"" + embeddedObject.Uid + "\" alt=\"" + embeddedObject.Uid + "\" />";  
+				return  "<img src=\"" + EscapeUrl(embeddedObject.Uid, "", isImage: true) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";  
 
 			//if you have embedded an asset directly via a download link.
 			case StyleType.Download:  
 				if (embeddedObject is IEmbeddedAsset)  
 				{  
-					return  "<span> Please find link to: <a href=\"" + ((IEmbeddedAsset)embeddedObject).Url + "\">" + (metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a></span>";  
+					return  "<span> Please find link to: <a href=\"" + EscapeUrl(((IEmbeddedAsset)embeddedObject).Url) + "\">" + EscapeText(metadata.Text ?? ((IEmbeddedAsset)embeddedObject).Title) + "</a></span>";  
 				}  
-				return  "<a href=\"" + embeddedObject.Uid + "\">" + (metadata.Text ?? embeddedObject.Uid) + "</a>";  
+				return  "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + EscapeText(metadata.Text ?? embeddedObject.Uid) + "</a>";  
 		}  
 		return  base.RenderOption(embeddedObject, metadata);  
 	}  
@@ -153,8 +154,38 @@ CustomRenderOption defaultRender = new CustomRenderOption(entry);
 > // Before (v1.x)
 > string src = node.attrs["src"].Value<string>();
 > // After (v2.0.0)
-> string src = node.attrs["src"].GetString();
+> string src = ((System.Text.Json.JsonElement)node.attrs["src"]).GetString();
 > ```
+
+## HTML escaping
+
+From v2.1.0 the default renderers escape RTE content before writing it into HTML. This is on by default.
+
+- **Text nodes:** `&`, `<` and `>` are escaped, so HTML typed as text displays as text.
+- **Attribute values** (`title`, `target`, `style`, `class`, `id`, `alt`): encoded with `System.Net.WebUtility.HtmlEncode`.
+- **URLs** (`href`, `src`): `javascript:`, `vbscript:` and `data:` URLs are blocked; `data:image/` is allowed only in an image `src`. A blocked link renders as `href="#"`; a blocked image or embed renders with an empty `src`. All other URLs are kept and encoded.
+
+Custom renderers now receive escaped text in `RenderMark` and escaped child HTML from the `RenderNode` callback, so don't escape those again. They are safe as element content, not inside an attribute. Values you read yourself, such as `node.attrs`, entry fields or the `className`/`id` arguments, still arrive raw. Escape them with the protected helpers on `Options`:
+
+```c#
+public override string RenderNode(string nodeType, Node node, NodeChildrenCallBack callBack)
+{
+    if (nodeType == "a")
+    {
+        string url = ((System.Text.Json.JsonElement)node.attrs["url"]).GetString();
+        return $"<a class=\"link\" href=\"{EscapeUrl(url)}\">{callBack(node.children)}</a>";
+    }
+    return base.RenderNode(nodeType, node, callBack);
+}
+```
+
+`EscapeText`, `EscapeAttribute` and `EscapeUrl` are the helpers (pass `isImage: true` to `EscapeUrl` for an image `src`). To restore the unescaped output of earlier versions, set `EscapeHtml = false`. Only do this if your content is trusted or you sanitize the rendered HTML yourself:
+
+```c#
+Options renderOption = new Options(entry) { EscapeHtml = false };
+```
+
+The HTML RTE path (`Utils.RenderContent`) still returns the stored HTML as is; only the embedded entries and assets it replaces are escaped.
 
 ## Variant Utility
 
