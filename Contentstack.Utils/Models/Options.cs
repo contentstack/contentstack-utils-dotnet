@@ -20,38 +20,33 @@ namespace Contentstack.Utils.Models
         public IEntryEmbedable entry;
 
         /// <summary>
-        /// When true (the default), the default renderers HTML-escape content values and block
-        /// javascript:, vbscript: and non-image data: URLs. Set to false to restore the unescaped
-        /// output of versions before 2.1.0. Only do this if your content is trusted or you sanitize
-        /// the rendered HTML yourself.
+        /// When true (the default), the default renderers HTML-escape RTE content: text is escaped
+        /// like the Java Utils SDK does (&amp;, &lt;, &gt;) and attribute values, including URLs, are
+        /// encoded with <see cref="System.Net.WebUtility.HtmlEncode(string)"/>. Set to false to restore
+        /// the unescaped output of versions before 2.1.0.
         /// </summary>
         public bool EscapeHtml { get; set; } = true;
 
         /// <summary>
-        /// Escapes a value for use as HTML text content. Returns the value unchanged when <see cref="EscapeHtml"/> is false.
-        /// Use it in custom renderers for values taken from the entry or from node attributes.
+        /// Escapes &amp;, &lt; and &gt; for use as HTML text content. Returns the value unchanged
+        /// when <see cref="EscapeHtml"/> is false. Use it in custom renderers for raw values such as
+        /// entry fields or node attributes.
         /// </summary>
-        protected string EscapeText(string value)
+        public string EscapeText(string value)
         {
-            return EscapeHtml ? HtmlEscaper.Text(value) : value;
+            if (!EscapeHtml || string.IsNullOrEmpty(value))
+                return value;
+            return value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
         }
 
         /// <summary>
-        /// Escapes a value for use inside a quoted HTML attribute. Returns the value unchanged when <see cref="EscapeHtml"/> is false.
+        /// Encodes a value for use inside a quoted HTML attribute (including href and src) with
+        /// <see cref="System.Net.WebUtility.HtmlEncode(string)"/>. Returns the value unchanged when
+        /// <see cref="EscapeHtml"/> is false.
         /// </summary>
-        protected string EscapeAttribute(string value)
+        public string EscapeAttribute(string value)
         {
-            return EscapeHtml ? HtmlEscaper.Attribute(value) : value;
-        }
-
-        /// <summary>
-        /// Escapes a URL for an href/src attribute. A javascript:, vbscript: or data: URL is replaced
-        /// with <paramref name="fallback"/>; set <paramref name="isImage"/> for an img src to allow data:image/ URLs.
-        /// Returns the value unchanged when <see cref="EscapeHtml"/> is false.
-        /// </summary>
-        protected string EscapeUrl(string url, string fallback = "#", bool isImage = false)
-        {
-            return EscapeHtml ? HtmlEscaper.Url(url, fallback, isImage) : url;
+            return EscapeHtml ? System.Net.WebUtility.HtmlEncode(value) : value;
         }
 
         public virtual string RenderOption(IEmbeddedObject embeddedObject, Metadata metadata)
@@ -83,23 +78,23 @@ namespace Contentstack.Utils.Models
                 case Enums.StyleType.Link:
                     if (embeddedObject is IEmbeddedEntry)
                     {
-                        return "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + (linkText ?? EscapeText(((IEmbeddedEntry)embeddedObject).Title)) + "</a>";
+                        return "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + (linkText ?? EscapeText(((IEmbeddedEntry)embeddedObject).Title)) + "</a>";
                     }
-                    return "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + (linkText ?? uid) + "</a>";
+                    return "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + (linkText ?? uid) + "</a>";
 
                 case Enums.StyleType.Display:
                     if (embeddedObject is IEmbeddedAsset)
                     {
-                        return "<img src=\"" + EscapeUrl(((IEmbeddedAsset)embeddedObject).Url, "", isImage: true) + "\" alt=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Title) + "\" />";
+                        return "<img src=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\" alt=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Title) + "\" />";
                     }
-                    return "<img src=\"" + EscapeUrl(embeddedObject.Uid, "", isImage: true) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";
+                    return "<img src=\"" + EscapeAttribute(embeddedObject.Uid) + "\" alt=\"" + EscapeAttribute(embeddedObject.Uid) + "\" />";
 
                 case Enums.StyleType.Download:
                     if (embeddedObject is IEmbeddedAsset)
                     {
-                        return "<a href=\"" + EscapeUrl(((IEmbeddedAsset)embeddedObject).Url) + "\">" + (linkText ?? EscapeText(((IEmbeddedAsset)embeddedObject).Title)) + "</a>";
+                        return "<a href=\"" + EscapeAttribute(((IEmbeddedAsset)embeddedObject).Url) + "\">" + (linkText ?? EscapeText(((IEmbeddedAsset)embeddedObject).Title)) + "</a>";
                     }
-                    return "<a href=\"" + EscapeUrl(embeddedObject.Uid) + "\">" + (linkText ?? uid) + "</a>";
+                    return "<a href=\"" + EscapeAttribute(embeddedObject.Uid) + "\">" + (linkText ?? uid) + "</a>";
             }
             return "";
         }
@@ -114,7 +109,7 @@ namespace Contentstack.Utils.Models
             if (metadata.Text == null || !EscapeHtml)
                 return metadata.Text;
             string text = string.IsNullOrEmpty(metadata.OuterHTML) ? metadata.Text : HtmlAgilityPack.HtmlEntity.DeEntitize(metadata.Text);
-            return HtmlEscaper.Text(text);
+            return EscapeText(text);
         }
 
         public virtual string RenderMark(MarkType markType, string text, string className = "", string id = "")
@@ -178,7 +173,7 @@ namespace Contentstack.Utils.Models
                 case "a":
                     if (node.attrs?.ContainsKey("url")==true)
                     {
-                        href = EscapeUrl(JsonAttrValue.AsString(node.attrs["url"]));
+                        href = EscapeAttribute(JsonAttrValue.AsString(node.attrs["url"]));
                     }
                     if (node.attrs?.ContainsKey("target") == true)
                     {
@@ -193,13 +188,13 @@ namespace Contentstack.Utils.Models
                 case "img":
                     if (node.attrs.ContainsKey("url"))
                     {
-                        href = EscapeUrl(JsonAttrValue.AsString(node.attrs["url"]), "", isImage: true);
+                        href = EscapeAttribute(JsonAttrValue.AsString(node.attrs["url"]));
                     }
                     return $"<img{styleAttrs} src=\"{href}\" />{callBack(node.children)}";
                 case "embed":
                     if (node.attrs.ContainsKey("url"))
                     {
-                        href = EscapeUrl(JsonAttrValue.AsString(node.attrs["url"]), "");
+                        href = EscapeAttribute(JsonAttrValue.AsString(node.attrs["url"]));
                     }
                     return $"<iframe{styleAttrs} src=\"{href}\">{callBack(node.children)}</iframe>";
                 case "fragment":
