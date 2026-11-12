@@ -8,11 +8,6 @@ using Xunit;
 
 namespace Contentstack.Utils.Tests
 {
-    /// <summary>
-    /// With EscapeHtml on (the default), content values render as text or quoted attribute values,
-    /// never as markup, as in the Java Utils SDK. URL schemes are not filtered (also as in Java).
-    /// With EscapeHtml off, output matches versions before 2.1.0.
-    /// </summary>
     public class HtmlEncodingTest
     {
         private readonly Options options = new Options();
