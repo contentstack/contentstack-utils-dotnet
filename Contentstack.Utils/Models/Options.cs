@@ -19,14 +19,8 @@ namespace Contentstack.Utils.Models
 
         public IEntryEmbedable entry;
 
-        /// <summary>
-        /// HTML-escape RTE content when rendering. Default true.
-        /// </summary>
         public bool EscapeHtml { get; set; } = true;
 
-        /// <summary>
-        /// Escapes a value for HTML text content.
-        /// </summary>
         public string EscapeText(string value)
         {
             if (!EscapeHtml || string.IsNullOrEmpty(value))
@@ -34,9 +28,6 @@ namespace Contentstack.Utils.Models
             return value.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
         }
 
-        /// <summary>
-        /// Escapes a value for an HTML attribute.
-        /// </summary>
         public string EscapeAttribute(string value)
         {
             return EscapeHtml ? System.Net.WebUtility.HtmlEncode(value) : value;
