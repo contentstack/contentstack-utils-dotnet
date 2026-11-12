@@ -1,3 +1,11 @@
+### Version: 2.0.2
+#### Date: November-12-2026
+- **Fix:** `JsonToHtml` (including the GQL overloads) and the default `Options` renderer now HTML-encode text nodes and all attribute values (`url`, `title`, `target`, `style`, `classname`, `id`).
+- **Fix:** URL schemes are restricted. Links allow relative URLs, `http`, `https`, `mailto`, `tel`, `sms` and `ftp`, and any other scheme renders as `href="#"`. Image sources allow relative URLs, `http`, `https` and `data:image/`. Embed (iframe) sources allow relative URLs, `http` and `https`. Disallowed image and embed sources render as an empty `src`. To keep other schemes (for example app deep links), override `RenderNode` for `a` (and `RenderOption` for embedded links).
+- **Fix:** Default embedded entry/asset rendering (`RenderOption`) encodes titles, UIDs, link text and asset URLs. For HTML RTE content, embedded link text is entity-decoded once before encoding, so it is not double-encoded.
+- **Behavior change:** HTML written as text inside JSON RTE text nodes is now displayed as text instead of being rendered. Text passed to `RenderMark`, and child HTML passed to custom `RenderNode` overrides, now arrives already encoded, so do not encode it again. `node.attrs` values, and the `className`/`id` arguments of `RenderMark`, still arrive raw, so custom renderers that write them into HTML must encode them.
+- **Note:** `RenderContent` (HTML RTE) still outputs the stored HTML as is; only the embedded entries and assets it replaces are encoded.
+
 ### Version: 2.0.1
 #### Date: July-20-2026
 - **Fix:** Bumped package version to 2.0.1. The 2.0.0 package published on nuget.org was built before `EmbeddedObjectConverter` was added, so the published package and source had silently diverged under the same version number. This release re-publishes with the version number unambiguously matching the source.
