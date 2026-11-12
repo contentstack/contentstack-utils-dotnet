@@ -10,7 +10,7 @@ namespace Contentstack.Utils.Tests
 {
     /// <summary>
     /// With EscapeHtml on (the default), content values render as text or quoted attribute values,
-    /// never as markup, and javascript:, vbscript: and non-image data: URLs are blocked.
+    /// never as markup, as in the Java Utils SDK. URL schemes are not filtered (also as in Java).
     /// With EscapeHtml off, output matches versions before 2.1.0.
     /// </summary>
     public class HtmlEncodingTest
@@ -68,22 +68,6 @@ namespace Contentstack.Utils.Tests
         }
 
         [Theory]
-        [InlineData("javascript:alert(1)")]
-        [InlineData("JaVaScRiPt:alert(1)")]
-        [InlineData(" javascript:alert(1)")]
-        [InlineData("java\\tscript:alert(1)")]
-        [InlineData("java\\nscript:alert(1)")]
-        [InlineData("\\u0001javascript:alert(1)")]
-        [InlineData("vbscript:msgbox(1)")]
-        [InlineData("data:text/html,<script>alert(1)</script>")]
-        [InlineData("data:image/svg+xml,<svg onload=alert(1)>")]
-        public void Link_With_Unsafe_Scheme_Is_Dropped(string url)
-        {
-            var result = Render("{\"type\":\"a\",\"attrs\":{\"url\":\"" + url + "\"},\"children\":[{\"text\":\"x\"}]}");
-            Assert.Equal("<a href=\"#\"  target=\"\" title=\"\" >x</a>", result);
-        }
-
-        [Theory]
         [InlineData("https://example.com/?a=1&b=2", "https://example.com/?a=1&amp;b=2")]
         [InlineData("http://example.com", "http://example.com")]
         [InlineData("/relative/path", "/relative/path")]
@@ -94,8 +78,10 @@ namespace Contentstack.Utils.Tests
         [InlineData("ftp://files.example.com/a.zip", "ftp://files.example.com/a.zip")]
         [InlineData("myapp://open/item?id=1", "myapp://open/item?id=1")]
         [InlineData("page:2", "page:2")]
+        [InlineData("javascript:alert(1)", "javascript:alert(1)")]
+        [InlineData("x\\\" onclick=\\\"alert(1)", "x&quot; onclick=&quot;alert(1)")]
         [InlineData("", "")]
-        public void Link_Url_Is_Kept_And_Encoded(string url, string expectedHref)
+        public void Link_Url_Is_Attribute_Encoded_Not_Filtered(string url, string expectedHref)
         {
             var result = Render("{\"type\":\"a\",\"attrs\":{\"url\":\"" + url + "\"},\"children\":[{\"text\":\"x\"}]}");
             Assert.Equal("<a href=\"" + expectedHref + "\"  target=\"\" title=\"\" >x</a>", result);
@@ -115,26 +101,11 @@ namespace Contentstack.Utils.Tests
             Assert.Equal("<img src=\"x&quot; onerror=&quot;alert(1)\" />", result);
         }
 
-        [Theory]
-        [InlineData("javascript:alert(1)", "")]
-        [InlineData("https://images.contentstack.io/v3/a.png", "https://images.contentstack.io/v3/a.png")]
-        [InlineData("data:image/png;base64,iVBORw0KGgo=", "data:image/png;base64,iVBORw0KGgo=")]
-        [InlineData("data:text/html;base64,PHNjcmlwdD4=", "")]
-        public void Image_Url_Scheme_Is_Filtered(string url, string expectedSrc)
+        [Fact]
+        public void Embed_Url_Cannot_Inject_Attributes()
         {
-            var result = Render("{\"type\":\"img\",\"attrs\":{\"url\":\"" + url + "\"},\"children\":[{\"text\":\"\"}]}");
-            Assert.Equal("<img src=\"" + expectedSrc + "\" />", result);
-        }
-
-        [Theory]
-        [InlineData("javascript:alert(1)", "")]
-        [InlineData("data:text/html,<script>alert(1)</script>", "")]
-        [InlineData("data:image/svg+xml,<svg onload=alert(1)>", "")]
-        [InlineData("https://www.youtube.com/embed/abc", "https://www.youtube.com/embed/abc")]
-        public void Embed_Url_Scheme_Is_Filtered(string url, string expectedSrc)
-        {
-            var result = Render("{\"type\":\"embed\",\"attrs\":{\"url\":\"" + url + "\"},\"children\":[{\"text\":\"\"}]}");
-            Assert.Equal("<iframe src=\"" + expectedSrc + "\"></iframe>", result);
+            var result = Render("{\"type\":\"embed\",\"attrs\":{\"url\":\"x\\\" onload=\\\"alert(1)\"},\"children\":[{\"text\":\"\"}]}");
+            Assert.Equal("<iframe src=\"x&quot; onload=&quot;alert(1)\"></iframe>", result);
         }
 
         [Fact]
@@ -172,13 +143,6 @@ namespace Contentstack.Utils.Tests
         }
 
         [Fact]
-        public void Embedded_Link_With_Unsafe_Uid_Is_Dropped()
-        {
-            var entry = new UnsafeEntry { Uid = "javascript:alert(1)", ContentTypeUid = "ct", Title = "t" };
-            Assert.Equal("<a href=\"#\">t</a>", options.RenderOption(entry, new Metadata { StyleType = StyleType.Link }));
-        }
-
-        [Fact]
         public void Embedded_Link_Text_Is_Encoded()
         {
             var entry = new UnsafeEntry { Uid = "uid", ContentTypeUid = "ct", Title = "t" };
@@ -189,11 +153,11 @@ namespace Contentstack.Utils.Tests
         [Fact]
         public void Embedded_Asset_Url_And_Title_Are_Encoded()
         {
-            var asset = new UnsafeAsset { Uid = "asset_uid", ContentTypeUid = "sys_assets", Title = "\"><script>alert(1)</script>", Url = "javascript:alert(1)" };
+            var asset = new UnsafeAsset { Uid = "asset_uid", ContentTypeUid = "sys_assets", Title = "\"><script>alert(1)</script>", Url = "x\" onerror=\"alert(1)" };
 
-            Assert.Equal("<img src=\"\" alt=\"&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;\" />",
+            Assert.Equal("<img src=\"x&quot; onerror=&quot;alert(1)\" alt=\"&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;\" />",
                 options.RenderOption(asset, new Metadata { StyleType = StyleType.Display }));
-            Assert.Equal("<a href=\"#\">\"&gt;&lt;script&gt;alert(1)&lt;/script&gt;</a>",
+            Assert.Equal("<a href=\"x&quot; onerror=&quot;alert(1)\">\"&gt;&lt;script&gt;alert(1)&lt;/script&gt;</a>",
                 options.RenderOption(asset, new Metadata { StyleType = StyleType.Download }));
         }
 
@@ -265,16 +229,16 @@ namespace Contentstack.Utils.Tests
         public void Custom_Renderer_Can_Use_Escape_Helpers()
         {
             var custom = new HelperRenderer();
-            Assert.Equal("<a href=\"#\" data-x=\"&quot;\">&lt;b&gt;</a>", custom.Render("javascript:alert(1)", "\"", "<b>"));
+            Assert.Equal("<a href=\"/a?b=1&amp;c=2\" data-x=\"&quot;\">&lt;b&gt;</a>", custom.Render("/a?b=1&c=2", "\"", "<b>"));
             custom.EscapeHtml = false;
-            Assert.Equal("<a href=\"javascript:alert(1)\" data-x=\"\"\"><b></a>", custom.Render("javascript:alert(1)", "\"", "<b>"));
+            Assert.Equal("<a href=\"/a?b=1&c=2\" data-x=\"\"\"><b></a>", custom.Render("/a?b=1&c=2", "\"", "<b>"));
         }
 
         private class HelperRenderer : Options
         {
             public string Render(string url, string attr, string text)
             {
-                return $"<a href=\"{EscapeUrl(url)}\" data-x=\"{EscapeAttribute(attr)}\">{EscapeText(text)}</a>";
+                return $"<a href=\"{EscapeAttribute(url)}\" data-x=\"{EscapeAttribute(attr)}\">{EscapeText(text)}</a>";
             }
         }
 
